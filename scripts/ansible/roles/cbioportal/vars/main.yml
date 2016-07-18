@@ -1,0 +1,41 @@
+---
+
+selinux_state: disabled
+
+iptables_enable_https: false
+
+cbioportal_root: /home/devel/cbioportal
+
+catalina_home: /usr/share/tomcat/
+
+java_packages:
+  - java-1.8.0-openjdk
+  - java-1.8.0-openjdk-devel
+
+maven_mirror: "https://archive.apache.org/dist/maven"
+
+mysql_databases:
+  - name: cbioportal
+  - name: cgds_test
+mysql_users:
+  - {name: cbio_user, password: "cbio_user", host: "%", priv: "cbioportal.*:ALL"}
+  - {name: cbio_user, password: "cbio_user", host: "%", priv: "cgds_test.*:ALL", append_privs: "yes"}
+
+cbioportal_database:
+  name: cbioportal
+  username: cbio_user
+  password: cbio_user
+
+mysq_connector_root: /home/devel/MySQL_JDBC_Driver
+
+#### RHEL/CentOS 7 MariaDB configuration
+mysql_packages:
+  - mariadb
+  - mariadb-server
+  - mariadb-libs
+  - MySQL-python
+  - perl-DBD-MySQL
+mysql_daemon: mariadb
+mysql_log_error: /var/log/mariadb/mariadb.log
+mysql_syslog_tag: mariadb
+mysql_pid_file: /var/run/mariadb/mariadb.pid

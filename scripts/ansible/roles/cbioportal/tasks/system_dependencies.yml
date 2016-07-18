@@ -1,0 +1,16 @@
+---
+
+- name: Install required system dependencies
+  yum: pkg={{item}} state=installed
+  sudo: yes
+  with_items:
+    - git
+    - unzip
+    - gzip
+    - iptables-services
+
+- name: Ensure the JAVA_HOME environment variable is set to the JDK installation
+  lineinfile: >
+    dest=/home/devel/.bash_profile
+    regexp='^export JAVA_HOME='
+    line='export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.91-1.b14.el7_2.x86_64'

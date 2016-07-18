@@ -1,0 +1,4 @@
+---
+
+iptables_enable_http: true
+iptables_enable_https: false

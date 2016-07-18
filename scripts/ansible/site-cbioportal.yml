@@ -1,0 +1,6 @@
+---
+
+- hosts: cbioportal
+  remote_user: devel
+  roles:
+    - cbioportal

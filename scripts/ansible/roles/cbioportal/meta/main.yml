@@ -1,0 +1,10 @@
+---
+
+dependencies:
+  - selinux
+  - iptables
+  - mysql
+  - tomcat7
+  - java
+  - maven
+  - apache
