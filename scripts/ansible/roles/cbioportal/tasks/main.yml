@@ -89,11 +89,12 @@
   become: yes
 
 # Revert to not using Tomcat's DBCP class to avoid errors with tomcat being unable to create resource factory instance, see http://stackoverflow.com/questions/21240052/classnotfoundexception-after-adding-the-jar-to-the-lib-folder-of-a-tomcat-service
+# Also configure to avoid MySQL broken pip after long periods of inactivity, see https://github.com/cbioportal/cbioportal/blob/master/docs/Deploying.md#gotcha--broken-mysql-pipe-after-long-periods-of-inactivity
 - name: Configure the Database Connection Pool Resource to Apache Tomcat
   lineinfile: >
      dest={{ catalina_home }}/conf/context.xml
      insertbefore='^</Context>$'
-     line='<Resource name="jdbc/cbioportal" auth="Container" type="javax.sql.DataSource" maxActive="100" maxIdle="30" maxWait="10000" username="{{ cbioportal_database.username }}" password="{{ cbioportal_database.password }}" driverClassName="com.mysql.jdbc.Driver" connectionProperties="zeroDateTimeBehavior=convertToNull;" factory="org.apache.commons.dbcp.BasicDataSourceFactory" url="jdbc:mysql://localhost:3306/cbioportal"/>'
+     line='<Resource name="jdbc/cbioportal" auth="Container" type="javax.sql.DataSource" maxActive="100" maxIdle="30" maxWait="10000" username="{{ cbioportal_database.username }}" password="{{ cbioportal_database.password }}" driverClassName="com.mysql.jdbc.Driver" connectionProperties="zeroDateTimeBehavior=convertToNull;" factory="org.apache.commons.dbcp.BasicDataSourceFactory" url="jdbc:mysql://localhost:3306/cbioportal" testOnBorrow="true" validationQuery="SELECT 1"/>'
   become: yes
 
 # ToDo: Potentially remove portal home variable (see pending build documentation changes in https://github.com/cBioPortal/cbioportal/pull/1473/files)
