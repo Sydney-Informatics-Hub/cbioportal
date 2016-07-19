@@ -1,0 +1,25 @@
+---
+
+- name: Get iptables rules
+  command: 'iptables -L'
+  register: iptablesrules
+  always_run: yes
+  changed_when: false
+  sudo: yes
+
+- name: Add firewall rule for http
+  command: 'iptables -I INPUT 1 -p tcp --dport http -j ACCEPT -m comment --comment "http"'
+  when: iptables_enable_http and iptablesrules.stdout.find("http") == -1
+  notify: restart iptables
+  sudo: yes
+
+- name: Add firewall rule for Apache https
+  command: 'iptables -I INPUT 1 -p tcp --dport https -j ACCEPT -m comment --comment "https"'
+  when: iptables_enable_https and iptablesrules.stdout.find("https") == -1
+  notify: restart iptables
+  sudo: yes
+
+- name: Save firewall rules
+  shell: 'iptables-save > /etc/sysconfig/iptables'
+  changed_when: false
+  sudo: yes

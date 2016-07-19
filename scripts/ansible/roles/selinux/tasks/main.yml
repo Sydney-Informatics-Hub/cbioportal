@@ -1,0 +1,16 @@
+---
+
+- name: Install libselinux if needed - required for ansible selinux module
+  yum: name=libselinux-python state=present
+  when: ansible_selinux == false
+  sudo: yes
+
+- name: Configuring selinux (system)
+  selinux: state={{selinux_state}}
+  sudo: yes
+
+- name: Configuring selinux (current session)
+  command: setenforce 0
+  when: selinux_state == "disabled"
+  sudo: yes
+  ignore_errors: yes    # Strange, but if SELinux is already disabled, this command returns 1.

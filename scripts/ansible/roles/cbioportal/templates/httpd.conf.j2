@@ -1,0 +1,13 @@
+<VirtualHost *:80>
+    ServerName {{ ansible_hostname }}
+
+    ProxyRequests Off
+
+    ProxyPass / http://127.0.0.1:8080/
+    ProxyPassReverse / http://127.0.0.1:8080/
+
+    <Location "/">
+        Order allow,deny
+        Allow from all
+    </Location>
+</VirtualHost>
