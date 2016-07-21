@@ -14,14 +14,13 @@ Available variables are listed below, along with default values:
 
 Set the branch/tag of the forked cBioPortal repository to use. See https://github.com/IntersectAustralia/cbioportal for available branches/tags.
 
+    load_sample_study: false
+
+Validates and loads the sample study provided with cBioPortal.
+
 ## Role Tags
 
 To skip a specific role tag include the argument "--skip-tags <tag>" when running the playbook.
-
-
-    loadSampleStudy
-
-Tasks related to loading the sample study used to verify that cBioPortal is functioning correctly.
 
     clean
 

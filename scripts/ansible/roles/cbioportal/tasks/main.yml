@@ -108,8 +108,6 @@
   shell: . /home/devel/.bash_profile && mvn -DskipTests clean install
   args:
     chdir: "{{ cbioportal_root }}"
-  tags:
-    - clean
 
 # ToDo: Potentially remove updating of portal home variable (see open issue https://github.com/cBioPortal/cbioportal/issues/1446)
 - name: Update the PORTAL_HOME environment variable
@@ -157,14 +155,12 @@
   args:
     chdir: "{{ cbioportal_root }}/core/src/main/scripts/importer"
   register: sample_validation_result
-  tags:
-    - loadSampleStudy
+  when: load_sample_study | bool
 
 - name: Confirm the sample study validation succeeeded
   assert:
     that: sample_validation_result.stderr.find('Validation of study succeeded with warnings.') != -1
-  tags:
-    - loadSampleStudy
+  when: load_sample_study | bool
 
 - name: Set the CATALINA_HOME environment variable
   lineinfile: >
@@ -222,17 +218,16 @@
     chdir: "{{ cbioportal_root }}/core/src/main/scripts/importer"
   register: sample_import_result
   become: yes
-  tags:
-    - loadSampleStudy
+  when: load_sample_study | bool
 
 - name: Confirm the sample study import succeeeded
   assert:
     that: sample_import_result.stdout_lines[-2] == "Done."
-  tags:
-    - loadSampleStudy
+  when: load_sample_study | bool
 
 - name: Restart Tomcat to be able to view the imported study
   service:
     name: tomcat
     state: restarted
   become: yes
+  when: load_sample_study | bool

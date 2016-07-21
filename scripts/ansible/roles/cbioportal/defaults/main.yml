@@ -1,3 +1,4 @@
 ---
 
 cbioportal_git_tag: HEAD
+load_sample_study: false
