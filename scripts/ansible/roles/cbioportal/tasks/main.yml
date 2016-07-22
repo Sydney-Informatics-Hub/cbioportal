@@ -41,6 +41,20 @@
     regexp='^db.password=somepassword$'
     line='db.password={{ cbioportal_database.password }}'
 
+# ToDo: reexamine once https://github.com/cBioPortal/cbioportal/issues/1507 is resolved
+- name: Set the portal properties to show the patient view drubs tab
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^skin.patient_view.show_clinical_trials_tab=false$'
+    line='skin.patient_view.show_clinical_trials_tab=true'
+
+# ToDo: reexamine once https://github.com/cBioPortal/cbioportal/issues/1507 is resolved
+- name: Set the portal properties to show the patient view clinical trials tab
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^skin.patient_view.show_drugs_tab=false$'
+    line='skin.patient_view.show_drugs_tab=true'
+
 - name: Copy the example logging properties file
   copy: >
     src={{ cbioportal_root }}/src/main/resources/log4j.properties.EXAMPLE
