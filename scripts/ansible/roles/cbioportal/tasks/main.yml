@@ -34,6 +34,7 @@
     src={{ cbioportal_root }}/src/main/resources/portal.properties.EXAMPLE
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
     remote_src=True
+    force=no
 
 - name: Prepare the portal properties file
   lineinfile: >
@@ -60,6 +61,7 @@
     src={{ cbioportal_root }}/src/main/resources/log4j.properties.EXAMPLE
     dest={{ cbioportal_root }}/src/main/resources/log4j.properties
     remote_src=True
+    force=no
 
 - name: Prepare the log4j.properties File
   lineinfile: >
@@ -144,7 +146,7 @@
   tags:
     - clean
 
-- name: Download the cBioPortal Database if it doesn't already exist
+- name: Download the cBioPortal seed database if it doesn't already exist
   get_url: >
     url=https://storage.googleapis.com/cbiostorage-1/cbioportal-seed.sql.gz
     dest=/home/devel
@@ -153,16 +155,21 @@
   tags:
     - clean
 
-- name: Unpackage the cBioPortal Database
+- name: Unpackage the cBioPortal seed database
   command: gunzip cbioportal-seed.sql.gz
   when: seed_db.stat.exists == False
   tags:
     - clean
 
-- name: Import the cBioPortal Database
+- name: Import the cBioPortal seed database
   shell: . /home/devel/.bash_profile && mysql --user="{{ cbioportal_database.username }}" --password="{{ cbioportal_database.password }}" cbioportal  < cbioportal-seed.sql
   tags:
     - clean
+
+- name: Remove the unpackaged cBioPortal seed database once imported
+  file: >
+     path=/home/devel/cbioportal-seed.sql
+     state=absent
 
 - name: Validate the sample study
   command: ./validateData.py -s ../../../test/scripts/test_data/study_es_0/ -n
