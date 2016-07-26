@@ -99,7 +99,6 @@
     url=https://storage.googleapis.com/cbiostorage-1/cbioportal-seed.sql.gz
     dest=/home/devel
     timeout=1000
-  when: seed_db.stat.exists == False
   tags:
     - clean
 
