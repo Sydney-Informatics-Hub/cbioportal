@@ -8,6 +8,7 @@ Installs cBioPortal for RedHat/CentOS 7.x servers.
     - a valid SSL .crt file on the target machine in the location specified in the SSLCertificateFile variable
     - a valid SSL .key file on the target machine in the location specified in the SSLCertificateKeyFile variable
     - a valid SSL .ca-bundle file on the target machine in the location specified in the SSLCACertificateFile variable
+    - the hostname on the target machine needs to be set to the fully qualified domain name
 
 ## Role Variables
 
