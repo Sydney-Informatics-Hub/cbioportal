@@ -29,13 +29,13 @@ Path to the SSL .key certificate key file to use with HTTPS.
 
 Path to the SSL .ca-bundle certificate bundle file to use with HTTPS.
 
+    load_sample_study: false
+
+Validates and loads the sample study provided with cBioPortal.
+
 ## Role Tags
 
 To skip a specific role tag include the argument "--skip-tags <tag>" when running the playbook.
-
-    loadSampleStudy
-
-Tasks related to loading the sample study used to verify that cBioPortal is functioning correctly.
 
     clean
 

@@ -2,6 +2,8 @@
 
 cbioportal_git_tag: HEAD
 
+load_sample_study: false
+
 SSLCertificateFile: /etc/httpd/ssl/star_intersect_org_au.crt
 SSLCertificateKeyFile: /etc/httpd/ssl/star_intersect_org_au.key
 SSLCACertificateFile: /etc/httpd/ssl/star_intersect_org_au.ca-bundle
