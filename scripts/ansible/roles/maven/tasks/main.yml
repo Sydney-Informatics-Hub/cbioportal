@@ -8,6 +8,12 @@
     that:
       - ansible_os_family in ['Archlinux', 'Debian', 'RedHat', 'Suse']
 
+- name: Install required system packages
+  package: name={{item}} state=present
+  become: yes
+  with_items:
+    - unzip
+    - gzip
 
 - name: Install Maven download directory (remote)
   tags: maven
