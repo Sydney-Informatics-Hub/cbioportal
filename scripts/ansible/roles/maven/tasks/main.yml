@@ -14,6 +14,7 @@
   with_items:
     - unzip
     - gzip
+    - tar
 
 - name: Install Maven download directory (remote)
   tags: maven
