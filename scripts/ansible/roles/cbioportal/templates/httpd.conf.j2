@@ -13,6 +13,9 @@ Listen 443
     SSLCertificateKeyFile {{ SSLCertificateKeyFile }}
     SSLCACertificateFile {{ SSLCACertificateFile }}
     SSLProtocol all -SSLv2 -SSLv3
+    SSLHonorCipherOrder On
+    SSLCipherSuite EECDH:ECHD:EDH:RSA+AES+SHA:RSA+3DES+SHA:!RC4:!MD5:!DES:!aNULL:!ADH:!eNULL:!LOW:!EXP:!PSK:!SRP:!DSS
+    SSLInsecureRenegotiation off
 
     ProxyRequests Off
 
