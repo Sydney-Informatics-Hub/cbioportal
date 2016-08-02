@@ -56,6 +56,18 @@
     regexp='^skin.patient_view.show_drugs_tab=false$'
     line='skin.patient_view.show_drugs_tab=true'
 
+- name: Set the portal properties to turn on user authorisation
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^authorization=false$'
+    line='authorization=true'
+
+- name: Set the portal properties to turn on user authentication
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^authenticate=false$'
+    line='authenticate=aaf'
+
 - name: Copy the example logging properties file
   copy: >
     src={{ cbioportal_root }}/src/main/resources/log4j.properties.EXAMPLE

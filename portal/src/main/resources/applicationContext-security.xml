@@ -10,7 +10,7 @@
 
 
     <!-- beans shared across any authentication system -->
-    <b:beans profile="googleplus,openid,saml,ad,ldap">
+    <b:beans profile="googleplus,openid,saml,ad,ldap,aaf">
         <b:bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
            <b:property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
            <b:property name="searchSystemEnvironment" value="true" />
@@ -82,6 +82,31 @@
     <!-- end beans shared across any authentication provider -->
     </b:beans>
 
+    <!-- aaf beans -->
+    <b:beans profile="aaf">
+
+        <http entry-point-ref="authenticationEntryPoint" use-expressions="true">
+            <intercept-url pattern="/auth/*" access="permitAll"/>
+            <intercept-url pattern="/favicon.ico" access="permitAll"/>
+            <intercept-url pattern="/login.jsp*" access="permitAll"/>
+            <intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
+            <intercept-url pattern="/**" access="isAuthenticated()"/>
+
+            <!--  logout actions -->
+            <logout logout-success-url="/login.jsp?logout_success=true" delete-cookies="JSESSIONID"/>
+            <!-- to enable access from matlab, r, python, etc clients -->
+            <session-management session-fixation-protection="none"/>
+        </http>
+
+        <b:bean id="authenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+            <b:property name="loginFormUrl" value="/login.jsp" />
+        </b:bean>
+
+        <authentication-manager alias="authenticationManager"/>
+        
+    <!-- end aaf beans -->
+    </b:beans>
+    
     <!-- googleplus beans -->
     <b:beans profile="googleplus">
 

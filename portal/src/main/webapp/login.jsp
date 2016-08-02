@@ -155,6 +155,14 @@
                   </p>
                 </fieldset>
 
+                <% } else if (authenticationMethod.equals("aaf")) { %>
+                  <p>
+                    <button onclick="location.href = 'https://rapid.test.aaf.edu.au/jwt/authnrequest/research/VrqHCxbNe1pB7udYwrqMOw'" style="padding: 0; border:none; background: none" >
+                      <IMG alt="Australian Access Federation" src="images/login/aaf_service_223x54.png" />
+                    </button>
+                  </p>
+                </fieldset>
+
                 <% } else if (authenticationMethod.equals("googleplus")) { %>
                   <p>
                     <button onclick="window.location = 'auth/google'" style="padding: 0; border:none; background: none" >
