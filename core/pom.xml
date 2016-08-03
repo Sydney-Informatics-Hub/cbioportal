@@ -126,6 +126,13 @@
       <version>3.0-rc2</version>
     </dependency>
 
+    <!-- JWT parsing -->
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>4.23</version>
+    </dependency>
+      
     <!-- json simple  -->
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
