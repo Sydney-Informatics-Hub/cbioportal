@@ -91,6 +91,8 @@
           </div>
           <% } %>
 
+          <!-- ToDo: force login_error=true when AAF authentication fails -->
+
           <% if (login_error != null) { %>
           <div class="ui-state-highlight ui-corner-all" style="padding: 0 .7em;width:90%;margin-top:50px">
             <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
@@ -157,7 +159,7 @@
 
                 <% } else if (authenticationMethod.equals("aaf")) { %>
                   <p>
-                    <button onclick="location.href = 'https://rapid.test.aaf.edu.au/jwt/authnrequest/research/VrqHCxbNe1pB7udYwrqMOw'" style="padding: 0; border:none; background: none" >
+                    <button onclick="location.href = '<%= GlobalProperties.getAafLoginInitiationUrl() %>'" style="padding: 0; border:none; background: none" >
                       <IMG alt="Australian Access Federation" src="images/login/aaf_service_223x54.png" />
                     </button>
                   </p>

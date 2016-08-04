@@ -104,9 +104,9 @@
             <b:property name="loginFormUrl" value="/login.jsp" />
         </b:bean>
         
-        <b:bean id="aafAuthenticationFilter" class="org.mskcc.cbio.portal.authentication.aaf.RequestHeaderAuthenticationFilter">
-            <b:property name="principalRequestHeader" value="assertion"/>
-            <b:property name="exceptionIfHeaderMissing" value="false"/>
+        <b:bean id="aafAuthenticationFilter" class="org.mskcc.cbio.portal.authentication.aaf.RequestParameterAuthenticationFilter">
+            <b:property name="principalRequestParameter" value="assertion"/>
+            <b:property name="exceptionIfParameterMissing" value="false"/>
             <b:property name="authenticationManager" ref="authenticationManager" />
         </b:bean>
         
@@ -125,6 +125,9 @@
          <!--beans used to compare token returned by authentication-provider against portal user db tables -->
         <b:bean id="userDetailsService" class="org.mskcc.cbio.portal.authentication.aaf.PortalUserDetailsService">
             <b:constructor-arg ref="portalUserDAO"/>
+            <b:constructor-arg value="${aaf.shared-secret}"/>
+            <b:constructor-arg value="${aaf.primary-url}"/>
+            <b:constructor-arg value="${aaf.production-federation}"/>
         </b:bean>
         
     <!-- end aaf beans -->

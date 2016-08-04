@@ -40,24 +40,28 @@ import org.mskcc.cbio.portal.util.DynamicState;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
-import com.google.common.base.Strings;
-import com.google.inject.internal.Preconditions;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.*;
 
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 
 import java.util.List;
+import java.util.Date;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.springframework.util.Assert;
 
 /**
- * Responsible for verifying that a social site user name has been registered in the
- * portal database For registered users, an instance of GoogleplusUserDetails is
- * completed and returned. Null is returned for non-registered users
- *
- * Implementation based on code in OpenIDUserDetailsService
- *
- * @author criscuof
+ * Responsible for verifying that an Australian Access Federation (AAF) 
+ * name has been registered in the portal database.
+ * 
+ * Implementation based on code in googleplus PortalUserDetailsService
+ * 
+ * @author shaun-intersect
  */
 public class PortalUserDetailsService implements UserDetailsService {
 
@@ -66,21 +70,78 @@ public class PortalUserDetailsService implements UserDetailsService {
     // ref to our user dao
     private final PortalUserDAO portalUserDAO;
 
+    private final String sharedSecret;
+    private final String primaryURL;
+    private final Boolean productionFederation;
+    
     /**
      * Constructor.
-     *
+     * <p>
      * Takes a ref to PortalUserDAO used to authenticate registered users in the
      * database.
      *
-     * @param portalUserDAO PortalUserDAO
+     * Also takes details used as part of service registration of the application with AAF Rapid Connect, specifically 
+     * the secret that was shared with Rapid Connect to sign the JWT and the web accessible endpoint that Rapid Connect 
+     * sends assertion header to as part of the HHTPS POST request.
+     *
+     * @param portalUserDAO ref to PortalUserDAO used to authenticate registered users in the database
+     * @param sharedSecret secret shared between cBioPortal and AAF Rapid Connect for signing and verifying JWT
+     * @param primaryURL HTTPS endpoint that accepts the POST request containing the assertion parameter
+     * @param productionFederation true if using the AAF productionFederation, false if using the test federation
      */
-    public PortalUserDetailsService(PortalUserDAO portalUserDAO) {
+    public PortalUserDetailsService(PortalUserDAO portalUserDAO, String sharedSecret, String primaryURL, 
+                                    Boolean productionFederation) {
         this.portalUserDAO = portalUserDAO;
+        this.sharedSecret = StringEscapeUtils.escapeJava(sharedSecret);
+        this.primaryURL = primaryURL;
+        this.productionFederation = productionFederation;
     }
-
+    
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(username), "A username is required");
+    public UserDetails loadUserByUsername(String assertion) throws UsernameNotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("loadUserByUsername(), Compact JWT: " + assertion);
+        }
+        
+        String username = null;
+        String issuer = "https://rapid.aaf.edu.au";
+        if (!productionFederation) {
+            issuer = "https://rapid.test.aaf.edu.au";
+        }                
+        try {
+            // Retrieve the claims set from the signed JWT assertion
+            SignedJWT signedJWT = SignedJWT.parse(assertion);
+            JWSVerifier verifier = new MACVerifier(sharedSecret);
+            assert(signedJWT.verify(verifier));
+            JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+            if (log.isDebugEnabled()) {
+                log.debug("loadByUsername(), JWT claims set: " + claimsSet.toString());
+            }
+            // Validate the claims of the JWT according to AAF requirements
+            String validationError = "Validation of signed JWT failed: ";
+            Assert.isTrue(claimsSet.getIssuer().equals(issuer), 
+                validationError + "iss claim must have the value " + "https://rapid.aaf.edu.au when in the " +
+                    "production environment, or https://rapid.test.aaf.edu.au when in the test environment");
+            Assert.isTrue(claimsSet.getAudience().size() == 1 && claimsSet.getAudience().get(0).equals(primaryURL),
+                validationError + "the aud claim must have the value of your application's primary URL");
+            Assert.isTrue(new Date().after(claimsSet.getNotBeforeTime()) || 
+                new Date().equals(claimsSet.getNotBeforeTime()), 
+                validationError + "the current time MUST be after or equal to the the time provided in the nbf claim");
+            Assert.isTrue(new Date().before(claimsSet.getExpirationTime()), 
+                validationError + "the current time MUST be before the time provided in the exp claim");
+            String jwtID = claimsSet.getJWTID();
+            /* ToDo: Ensure that the value of the jti claim does not exist in a local storage mechanism of 
+             * jti claim values you have accepted. If it doesn't (this SHOULD be the case) add the jti 
+             * claim value to your local storage mechanism for future protection against replay attacks
+             */
+            
+            
+            // Extract the AAF user's public email address as the portal username
+            username = claimsSet.getJSONObjectClaim("https://aaf.edu.au/attributes").get("mail").toString();
+        } catch (Exception e) {
+            log.debug("Exception occurred whilst handling assertion: " + e + '\n' + ExceptionUtils.getStackTrace(e));
+        }
+        
         // set the username into the global state so other components can find out who
         // logged in or tried to log in most recently
         DynamicState.INSTANCE.setCurrentUser(username);
@@ -106,8 +167,6 @@ public class PortalUserDetailsService implements UserDetailsService {
                 toReturn = new PortalUserDetails(username, grantedAuthorities);
                 toReturn.setEmail(user.getEmail());
                 toReturn.setName(user.getName());
-
-
             }
         }
 

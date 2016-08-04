@@ -169,6 +169,9 @@ public class GlobalProperties {
     // property for the saml entityid
     public static final String SAML_IDP_METADATA_ENTITYID="saml.idp.metadata.entityid";
 
+    // property for the AAF login initiation url
+    public static final String AAF_LOGIN_INITIATION_URL="aaf.login-initiation-url";
+    
     // property for the custom header tabs
     public static final String SKIN_CUSTOM_HEADER_TABS="skin.custom_header_tabs";
 
@@ -413,6 +416,13 @@ public class GlobalProperties {
     {
         return getProperty(SAML_IDP_METADATA_ENTITYID);
     }
+    
+    // get the url to initiate login via AAF
+    public static String getAafLoginInitiationUrl() 
+    {
+        return getProperty(AAF_LOGIN_INITIATION_URL);
+    }
+    
     public static String getTagLineImage()
     {
         String tagLineImage = properties.getProperty(SKIN_TAG_LINE_IMAGE);
