@@ -92,6 +92,8 @@
             <intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
             <intercept-url pattern="/**" access="isAuthenticated()"/>
 
+            <custom-filter ref="aafAuthenticationFilter" before="PRE_AUTH_FILTER" />
+            
             <!--  logout actions -->
             <logout logout-success-url="/login.jsp?logout_success=true" delete-cookies="JSESSIONID"/>
             <!-- to enable access from matlab, r, python, etc clients -->
@@ -101,8 +103,29 @@
         <b:bean id="authenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
             <b:property name="loginFormUrl" value="/login.jsp" />
         </b:bean>
+        
+        <b:bean id="aafAuthenticationFilter" class="org.mskcc.cbio.portal.authentication.aaf.RequestHeaderAuthenticationFilter">
+            <b:property name="principalRequestHeader" value="assertion"/>
+            <b:property name="exceptionIfHeaderMissing" value="false"/>
+            <b:property name="authenticationManager" ref="authenticationManager" />
+        </b:bean>
+        
+        <b:bean id="preauthAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+            <b:property name="preAuthenticatedUserDetailsService">
+                <b:bean id="userDetailsServiceWrapper" class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+                    <b:property name="userDetailsService" ref="userDetailsService"/>
+                </b:bean>
+            </b:property>
+        </b:bean>
 
-        <authentication-manager alias="authenticationManager"/>
+        <authentication-manager alias="authenticationManager">
+            <authentication-provider ref="preauthAuthProvider"/>
+        </authentication-manager>
+            
+         <!--beans used to compare token returned by authentication-provider against portal user db tables -->
+        <b:bean id="userDetailsService" class="org.mskcc.cbio.portal.authentication.aaf.PortalUserDetailsService">
+            <b:constructor-arg ref="portalUserDAO"/>
+        </b:bean>
         
     <!-- end aaf beans -->
     </b:beans>
