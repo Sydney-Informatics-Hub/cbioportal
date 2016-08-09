@@ -129,12 +129,9 @@ public class PortalUserDetailsService implements UserDetailsService {
                 validationError + "the current time MUST be after or equal to the the time provided in the nbf claim");
             Assert.isTrue(new Date().before(claimsSet.getExpirationTime()), 
                 validationError + "the current time MUST be before the time provided in the exp claim");
-            String jwtID = claimsSet.getJWTID();
-            /* ToDo: Ensure that the value of the jti claim does not exist in a local storage mechanism of 
-             * jti claim values you have accepted. If it doesn't (this SHOULD be the case) add the jti 
-             * claim value to your local storage mechanism for future protection against replay attacks
-             */
-            
+            Assert.isTrue(!DaoJtiClaim.jtiClaimExists(claimsSet.getJWTID()),
+                validationError + "the jti claim value (jwt id) already exists within the local storage");
+            DaoJtiClaim.addJtiClaim(claimsSet.getJWTID()); // Add the JWT ID to the list of accepted jti claim values
             
             // Extract the AAF user's public email address as the portal username
             username = claimsSet.getJSONObjectClaim("https://aaf.edu.au/attributes").get("mail").toString();

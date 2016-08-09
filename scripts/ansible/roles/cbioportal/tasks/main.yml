@@ -126,8 +126,25 @@
 
 - name: Remove the unpackaged cBioPortal seed database once imported
   file: >
-     path=/home/devel/cbioportal-seed.sql
-     state=absent
+    path=/home/devel/cbioportal-seed.sql
+    state=absent
+
+- name: Copy the cBioPortal jti claim database table seed file
+  copy: >
+    src=jti_claim.sql
+    dest=/home/devel/jti_claim.sql
+  tags:
+    - clean
+
+- name: Import the cBioPortal jti claim database table
+  shell: . /home/devel/.bash_profile && mysql --user="{{ cbioportal_database.username }}" --password="{{ cbioportal_database.password }}" cbioportal  < jti_claim.sql  
+  tags:
+    - clean
+
+- name: Remove the jti claim seed file once imported
+  file: >
+    path=/home/devel/jti_claim.sql
+    state=absent
 
 - name: Validate the sample study
   command: ./validateData.py -s ../../../test/scripts/test_data/study_es_0/ -n
