@@ -42,18 +42,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.exception.ExceptionUtils;
 
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.*;
-
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 
 import java.util.List;
-import java.util.Date;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.springframework.util.Assert;
 
 /**
  * Responsible for verifying that an Australian Access Federation (AAF) 
@@ -92,53 +85,21 @@ public class PortalUserDetailsService implements UserDetailsService {
     public PortalUserDetailsService(PortalUserDAO portalUserDAO, String sharedSecret, String primaryURL, 
                                     Boolean productionFederation) {
         this.portalUserDAO = portalUserDAO;
-        this.sharedSecret = StringEscapeUtils.escapeJava(sharedSecret);
+        this.sharedSecret = sharedSecret;
         this.primaryURL = primaryURL;
         this.productionFederation = productionFederation;
     }
     
     @Override
     public UserDetails loadUserByUsername(String assertion) throws UsernameNotFoundException {
-        if (log.isDebugEnabled()) {
-            log.debug("loadUserByUsername(), Compact JWT: " + assertion);
-        }
-        
         String username = null;
-        String issuer = "https://rapid.aaf.edu.au";
-        if (!productionFederation) {
-            issuer = "https://rapid.test.aaf.edu.au";
-        }                
         try {
-            // Retrieve the claims set from the signed JWT assertion
-            SignedJWT signedJWT = SignedJWT.parse(assertion);
-            JWSVerifier verifier = new MACVerifier(sharedSecret);
-            assert(signedJWT.verify(verifier));
-            JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
-            if (log.isDebugEnabled()) {
-                log.debug("loadByUsername(), JWT claims set: " + claimsSet.toString());
-            }
-            // Validate the claims of the JWT according to AAF requirements
-            String validationError = "Validation of signed JWT failed: ";
-            Assert.isTrue(claimsSet.getIssuer().equals(issuer), 
-                validationError + "iss claim must have the value " + "https://rapid.aaf.edu.au when in the " +
-                    "production environment, or https://rapid.test.aaf.edu.au when in the test environment");
-            Assert.isTrue(claimsSet.getAudience().size() == 1 && claimsSet.getAudience().get(0).equals(primaryURL),
-                validationError + "the aud claim must have the value of your application's primary URL");
-            Assert.isTrue(new Date().after(claimsSet.getNotBeforeTime()) || 
-                new Date().equals(claimsSet.getNotBeforeTime()), 
-                validationError + "the current time MUST be after or equal to the the time provided in the nbf claim");
-            Assert.isTrue(new Date().before(claimsSet.getExpirationTime()), 
-                validationError + "the current time MUST be before the time provided in the exp claim");
-            Assert.isTrue(!DaoJtiClaim.jtiClaimExists(claimsSet.getJWTID()),
-                validationError + "the jti claim value (jwt id) already exists within the local storage");
-            DaoJtiClaim.addJtiClaim(claimsSet.getJWTID()); // Add the JWT ID to the list of accepted jti claim values
-            
-            // Extract the AAF user's public email address as the portal username
-            username = claimsSet.getJSONObjectClaim("https://aaf.edu.au/attributes").get("mail").toString();
+            AafJwtHandler jwtHandler = new AafJwtHandler(assertion, sharedSecret, primaryURL, productionFederation);
+            username = jwtHandler.getEmail();
         } catch (Exception e) {
             log.debug("Exception occurred whilst handling assertion: " + e + '\n' + ExceptionUtils.getStackTrace(e));
         }
-        
+                
         // set the username into the global state so other components can find out who
         // logged in or tried to log in most recently
         DynamicState.INSTANCE.setCurrentUser(username);

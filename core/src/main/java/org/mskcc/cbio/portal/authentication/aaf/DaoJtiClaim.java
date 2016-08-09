@@ -13,7 +13,7 @@ import java.sql.SQLException;
  *
  * @author Shaun Muscat
  */
-public class DaoJtiClaim {
+class DaoJtiClaim {
 
     /**
      * Adds a the JWT ID of a JTI claim to the database
@@ -21,7 +21,7 @@ public class DaoJtiClaim {
      * @return see {@link java.sql.PreparedStatement#executeUpdate}
      * @throws DaoException
      */
-    public static int addJtiClaim(String jwtId) throws DaoException {
+    static int addJtiClaim(String jwtId) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -43,7 +43,7 @@ public class DaoJtiClaim {
      * @return true if ID exists, false otherwise
      * @throws DaoException
      */
-    public static boolean jtiClaimExists(String jwtId) throws DaoException {
+    static boolean jtiClaimExists(String jwtId) throws DaoException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
