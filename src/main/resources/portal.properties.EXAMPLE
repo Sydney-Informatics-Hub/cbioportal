@@ -83,8 +83,7 @@ filter_groups_by_appname=true
 aaf.login-initiation-url=
 aaf.primary-url=
 aaf.production-federation=true
-## IMPORTANT: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\)
-## otherwise the backslash will be silently dropped when the property is loaded
+## IMPORTANT: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\) otherwise the backslash will be silently dropped when the property is loaded
 aaf.shared-secret=
 ## settings to connect to googleplus auth infrastructure
 googleplus.consumer.key=

@@ -1,9 +1,21 @@
 ---
-
+# Tag of the cBioPortal to target when cloning from Github
 cbioportal_git_tag: HEAD
 
+# Flag to indicate whether the cBioPortal sample study should be loaded as part of deployment
 load_sample_study: false
 
-SSLCertificateFile: /etc/httpd/ssl/star_intersect_org_au.crt
-SSLCertificateKeyFile: /etc/httpd/ssl/star_intersect_org_au.key
-SSLCACertificateFile: /etc/httpd/ssl/star_intersect_org_au.ca-bundle
+# Path to SSL certificate files
+SSLCertificateFile:
+SSLCertificateKeyFile:
+SSLCACertificateFile:
+
+# Unique URL for the application to inititation login with Rapid Connect, provided once service registration is approved
+service_login_initiation_url:
+# Primary URL of the application provided as part of service registration, e.g. https://westmead-cbioportal.intersect.org.au/cbioportal 
+service_primary_url:
+# Indicates whether the Rapid Connect production or test federation is being used, true if production, false if test  
+service_production_federation:
+# Secret value shared between the service and Rapid Connect, as part of registration, for token encryption and verification
+# Note: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\\), otherwise the backslash will be silently dropped when the property is loaded within cBioPortal
+service_shared_secret:

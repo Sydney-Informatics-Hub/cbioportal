@@ -34,6 +34,23 @@ Path to the SSL .ca-bundle certificate bundle file to use with HTTPS.
 
 Validates and loads the sample study provided with cBioPortal.
 
+    service_login_initiation_url
+    
+Unique URL for the application to inititation login with Rapid Connect, provided once service registration is approved
+
+    service_primary_url
+
+Primary URL of the application provided as part of service registration, e.g. https://westmead-cbioportal.intersect.org.au/cbioportal
+
+    service_production_federation
+    
+Indicates whether the Rapid Connect production or test federation is being used, true if production, false if test
+
+    service_shared_secret
+    
+Secret value shared between the service and Rapid Connect, as part of registration, for token encryption and verification. 
+Note: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\\), otherwise the backslash will be silently dropped when the property is loaded within cBioPortal.
+
 ## Role Tags
 
 To skip a specific role tag include the argument "--skip-tags <tag>" when running the playbook.
