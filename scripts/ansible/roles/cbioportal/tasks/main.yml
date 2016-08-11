@@ -21,9 +21,9 @@
     src=httpd.conf.j2
     dest=/etc/httpd/conf.d/cbioportal.conf
   when: 
-    - SSLCertificateFile is defined
-    - SSLCertificateKeyFile is defined
-    - SSLCACertificateFile is defined
+    - SSLCertificateFile is defined and SSLCertificateFile != "" and SSLCertificateFile != None
+    - SSLCertificateKeyFile is defined and SSLCertificateKeyFile != "" and SSLCertificateKeyFile != None
+    - SSLCACertificateFile is defined and SSLCACertificateFile != "" and SSLCACertificateFile != None
   notify: restart apache
   become: yes
 
@@ -32,7 +32,7 @@
   register: apacheConfig
   
 - name: Fail id the Apache config doesn't exist
-  fail: msg="Whoops! The Apache config for cBioPortal hasn't been created yet. Please run the playbook again with the extra variables 'SSLCertificateFile', 'SSLCertificateKeyFile' and 'SSLCACertificateFile' defined."
+  fail: msg="Whoops! The Apache config for cBioPortal hasn't been created yet. Please run the playbook again with the extra variables 'SSLCertificateFile', 'SSLCertificateKeyFile' and 'SSLCACertificateFile' defined and non-empty."
   when: apacheConfig.stat.exists == False
 
 - name: Setup httpd logrotate
@@ -85,28 +85,28 @@
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
     regexp='^aaf.login-initiation-url='
     line='aaf.login-initiation-url={{ service_login_initiation_url }}'
-  when: service_login_initiation_url is defined
+  when: service_login_initiation_url is defined and service_login_initiation_url != "" and service_login_initiation_url != None
  
 - name: Update the portal properties with the service primary url
   lineinfile: > 
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
     regexp='^aaf.primary-url='
     line='aaf.primary-url={{ service_primary_url }}'
-  when: service_primary_url is defined
+  when: service_primary_url is defined and service_primary_url != "" and service_primary_url != None
 
 - name: Update the portal properties with whether the service was registered with the production
   lineinfile: > 
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
     regexp='^aaf.production-federation='
     line='aaf.production-federation={{ service_production_federation }}'
-  when: service_production_federation is defined
+  when: service_production_federation is defined and service_production_federation != "" and service_production_federation != None
 
 - name: Update the portal properties with the service shared secret
   lineinfile: > 
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
     regexp='^aaf.shared-secret='
     line='aaf.shared-secret={{ service_shared_secret }}'
-  when: service_shared_secret is defined
+  when: service_shared_secret is defined and service_shared_secret != "" and service_shared_secret != None
 
 - name: Copy the example logging properties file
   copy: >
