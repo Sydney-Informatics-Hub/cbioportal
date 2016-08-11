@@ -200,7 +200,7 @@
 
 # Manually pass the PORTAL_HOME environment var since it isn't preserved when running as sudo
 - name: Import the sample study
-  shell: . /home/devel/.bash_profile && env PORTAL_HOME="{{cbioportal_root}}" ./metaImport.py -s ../../../test/scripts/test_data/study_es_0/ -o
+  shell: . /home/devel/.bash_profile && env PORTAL_HOME="{{cbioportal_root}}" ./metaImport.py -s ../../../test/scripts/test_data/study_es_0/ -n -o
   args:
     chdir: "{{ cbioportal_root }}/core/src/main/scripts/importer"
   register: sample_import_result
