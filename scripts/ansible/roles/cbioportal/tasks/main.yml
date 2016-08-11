@@ -37,7 +37,7 @@
 
 - name: Setup httpd logrotate
   copy: >
-    src=logrotate.httpd.j2
+    src=logrotate.httpd
     dest=/etc/logrotate.d/httpd.logrotate
   become: yes
 
