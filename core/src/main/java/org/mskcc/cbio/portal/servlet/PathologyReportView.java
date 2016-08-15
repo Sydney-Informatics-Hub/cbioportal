@@ -135,7 +135,8 @@ public class PathologyReportView extends HttpServlet {
                 "You are not authorized to access the cancer study with id: '" + cancerStudyIdentifier + "'. ");
             return false;
         }
-
+        
+        // Todo: incorporate some form of path validation so that arbitrary paths (such as study_id/../../sensitive.file) can't result in non-pathology report files being returned 
         File requestedFile = new File(DATA_DIRECTORY, path);
         if (!requestedFile.exists() || requestedFile.isDirectory()) {
             request.setAttribute(ERROR, "Unable to locate pathology report: '" + requestedFile.getName() + "' " +
