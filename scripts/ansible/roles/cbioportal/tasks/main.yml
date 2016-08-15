@@ -68,6 +68,12 @@
     regexp='^skin.patient_view.show_drugs_tab=false$'
     line='skin.patient_view.show_drugs_tab=true'
 
+- name: Set the portal properties to use internal pathology reports
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.use_internal_path_report='
+    line='patient_view.use_internal_path_report=true'
+
 - name: Set the portal properties to turn on user authorisation
   lineinfile: >
     dest={{ cbioportal_root }}/src/main/resources/portal.properties

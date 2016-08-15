@@ -484,17 +484,19 @@ public class PatientView extends HttpServlet {
         }
         
         // path report
-//        String typeOfCancer = cancerStudy.getTypeOfCancerId();
-//        if (patientId!=null && patientId.startsWith("TCGA-")) {
-//            String pathReport = getTCGAPathReport(typeOfCancer, patientId);
-//            if (pathReport!=null) {
-//                request.setAttribute(PATH_REPORT_URL, pathReport);
-//            }
-//        }
-        
-        // ToDo: set pathology report URL list by seeing if corresponding url returns a 200 OK, see  extractLinksByPattern() line 586 for example
-        final String pathReport = "pathology_report/" + cancerStudy.getCancerStudyStableId() + "/test.pdf";
-        request.setAttribute(PATH_REPORT_URL, pathReport);
+        if (GlobalProperties.useInternalPathReports()) {
+            // ToDo: set pathology report URL list by seeing if corresponding url returns a 200 OK, see  extractLinksByPattern() line 586 for example
+            final String pathReport = "pathology_report/" + cancerStudy.getCancerStudyStableId() + "/test.pdf";
+            request.setAttribute(PATH_REPORT_URL, pathReport);   
+        } else {
+            String typeOfCancer = cancerStudy.getTypeOfCancerId();
+            if (patientId!=null && patientId.startsWith("TCGA-")) {
+                String pathReport = getTCGAPathReport(typeOfCancer, patientId);
+                if (pathReport!=null) {
+                    request.setAttribute(PATH_REPORT_URL, pathReport);
+                }
+            }            
+        }
     }
     
     private String getTissueImageIframeUrl(String cancerStudyId, String caseId) {
