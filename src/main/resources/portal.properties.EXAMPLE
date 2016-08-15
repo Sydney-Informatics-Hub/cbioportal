@@ -74,11 +74,17 @@ skin.study_view.link_text=To build your own case set, try out our enhanced Study
 # authentication
 ## is authorization enabled at all? (true, false)
 authorization=false
-## which method of authentication to use (false, googleplus, saml, openid, ad, ldap)
+## which method of authentication to use (false, googleplus, saml, openid, ad, ldap, aaf)
 authenticate=false
 ## Should the permissions for groups and users be filtered by this instance's app.name?
 ## (true means the system only handles "CBIOPORTAL:someGroupPermission" groups, false means "someGroupPermission" works)
 filter_groups_by_appname=true
+## Settings to connect to Australian Access Federation (aaf) Rapid Connect
+aaf.login-initiation-url=
+aaf.primary-url=
+aaf.issuer=https://rapid.aaf.edu.au
+## IMPORTANT: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\) otherwise the backslash will be silently dropped when the property is loaded
+aaf.shared-secret=
 ## settings to connect to googleplus auth infrastructure
 googleplus.consumer.key=
 googleplus.consumer.secret=

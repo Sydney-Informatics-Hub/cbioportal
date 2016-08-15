@@ -39,7 +39,7 @@
 	if (authenticationMethod.equals("openid") || authenticationMethod.equals("ldap")) {
 		principal = "principal.name";
 	}
-	else if (authenticationMethod.equals("googleplus") || authenticationMethod.equals("saml") || authenticationMethod.equals("ad")) {
+	else if (authenticationMethod.equals("googleplus") || authenticationMethod.equals("saml") || authenticationMethod.equals("ad") || authenticationMethod.equals("aaf")){
 		principal = "principal.username";
 	}
 	String tagLineImage = (authenticationMethod.equals("saml")) ?
