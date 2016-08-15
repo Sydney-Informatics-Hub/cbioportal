@@ -91,6 +91,8 @@
           </div>
           <% } %>
 
+          <!-- ToDo: force login_error=true when AAF authentication fails -->
+
           <% if (login_error != null) { %>
           <div class="ui-state-highlight ui-corner-all" style="padding: 0 .7em;width:90%;margin-top:50px">
             <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
@@ -152,6 +154,14 @@
                     <!-- removed the hard-coded saml registration html and calling GlobalProperties instead -->
                     <button id="saml_login_button" type="button" class="btn btn-danger btn-lg" onclick="window.location = 'login?idp=<%= GlobalProperties.getSamlIdpMetadataEntityid() %>'" >
                     <%= GlobalProperties.getLoginSamlRegistrationHtml() %></button>
+                  </p>
+                </fieldset>
+
+                <% } else if (authenticationMethod.equals("aaf")) { %>
+                  <p>
+                    <button onclick="location.href = '<%= GlobalProperties.getAafLoginInitiationUrl() %>'" style="padding: 0; border:none; background: none" >
+                      <IMG alt="Australian Access Federation" src="images/login/aaf_service_223x54.png" />
+                    </button>
                   </p>
                 </fieldset>
 

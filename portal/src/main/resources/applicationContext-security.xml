@@ -10,7 +10,7 @@
 
 
     <!-- beans shared across any authentication system -->
-    <b:beans profile="googleplus,openid,saml,ad,ldap">
+    <b:beans profile="googleplus,openid,saml,ad,ldap,aaf">
         <b:bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
            <b:property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
            <b:property name="searchSystemEnvironment" value="true" />
@@ -82,6 +82,57 @@
     <!-- end beans shared across any authentication provider -->
     </b:beans>
 
+    <!-- aaf beans -->
+    <b:beans profile="aaf">
+
+        <http entry-point-ref="authenticationEntryPoint" use-expressions="true">
+            <intercept-url pattern="/auth/*" access="permitAll"/>
+            <intercept-url pattern="/favicon.ico" access="permitAll"/>
+            <intercept-url pattern="/login.jsp*" access="permitAll"/>
+            <intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
+            <intercept-url pattern="/**" access="isAuthenticated()"/>
+
+            <custom-filter ref="aafAuthenticationFilter" before="PRE_AUTH_FILTER" />
+            
+            <!--  logout actions -->
+            <logout logout-success-url="/login.jsp?logout_success=true" delete-cookies="JSESSIONID"/>
+            <!-- to enable access from matlab, r, python, etc clients -->
+            <session-management session-fixation-protection="none"/>
+        </http>
+
+        <b:bean id="authenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+            <b:property name="loginFormUrl" value="/login.jsp" />
+        </b:bean>
+        
+        <b:bean id="aafAuthenticationFilter" class="org.mskcc.cbio.portal.authentication.aaf.RequestParameterAuthenticationFilter">
+            <b:property name="principalRequestParameter" value="assertion"/>
+            <b:property name="exceptionIfParameterMissing" value="false"/>
+            <b:property name="authenticationManager" ref="authenticationManager" />
+        </b:bean>
+        
+        <b:bean id="preauthAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+            <b:property name="preAuthenticatedUserDetailsService">
+                <b:bean id="userDetailsServiceWrapper" class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+                    <b:property name="userDetailsService" ref="userDetailsService"/>
+                </b:bean>
+            </b:property>
+        </b:bean>
+
+        <authentication-manager alias="authenticationManager">
+            <authentication-provider ref="preauthAuthProvider"/>
+        </authentication-manager>
+            
+         <!--beans used to compare token returned by authentication-provider against portal user db tables -->
+        <b:bean id="userDetailsService" class="org.mskcc.cbio.portal.authentication.aaf.PortalUserDetailsService">
+            <b:constructor-arg ref="portalUserDAO"/>
+            <b:constructor-arg value="${aaf.shared-secret}"/>
+            <b:constructor-arg value="${aaf.primary-url}"/>
+            <b:constructor-arg value="${aaf.issuer}"/>
+        </b:bean>
+        
+    <!-- end aaf beans -->
+    </b:beans>
+    
     <!-- googleplus beans -->
     <b:beans profile="googleplus">
 

@@ -1,5 +1,21 @@
+LoadModule ssl_module modules/mod_ssl.so
+Listen 443
+
 <VirtualHost *:80>
-    ServerName {{ ansible_hostname }}
+  Redirect permanent / https://{{ ansible_nodename }}/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName {{ ansible_nodename }}
+
+    SSLEngine on
+    SSLCertificateFile {{ SSLCertificateFile }}
+    SSLCertificateKeyFile {{ SSLCertificateKeyFile }}
+    SSLCACertificateFile {{ SSLCACertificateFile }}
+    SSLProtocol all -SSLv2 -SSLv3
+    SSLHonorCipherOrder On
+    SSLCipherSuite EECDH:ECHD:EDH:RSA+AES+SHA:RSA+3DES+SHA:!RC4:!MD5:!DES:!aNULL:!ADH:!eNULL:!LOW:!EXP:!PSK:!SRP:!DSS
+    SSLInsecureRenegotiation off
 
     ProxyRequests Off
 

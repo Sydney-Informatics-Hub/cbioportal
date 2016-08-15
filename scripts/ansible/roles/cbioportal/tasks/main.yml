@@ -20,14 +20,26 @@
   template: >
     src=httpd.conf.j2
     dest=/etc/httpd/conf.d/cbioportal.conf
+  when: 
+    - SSLCertificateFile is defined and SSLCertificateFile != "" and SSLCertificateFile != None
+    - SSLCertificateKeyFile is defined and SSLCertificateKeyFile != "" and SSLCertificateKeyFile != None
+    - SSLCACertificateFile is defined and SSLCACertificateFile != "" and SSLCACertificateFile != None
   notify: restart apache
   become: yes
 
+- name: Check that the Apache config exists
+  stat: path=/etc/httpd/conf.d/cbioportal.conf
+  register: apacheConfig
+  
+- name: Fail id the Apache config doesn't exist
+  fail: msg="Whoops! The Apache config for cBioPortal hasn't been created yet. Please run the playbook again with the extra variables 'SSLCertificateFile', 'SSLCertificateKeyFile' and 'SSLCACertificateFile' defined and non-empty."
+  when: apacheConfig.stat.exists == False
+
 - name: Setup httpd logrotate
-  template: >
-    src=logrotate.httpd.j2
+  copy: >
+    src=logrotate.httpd
     dest=/etc/logrotate.d/httpd.logrotate
-  sudo: yes
+  become: yes
 
 - name: Copy the example global confirguration properties file
   copy: >
@@ -55,6 +67,46 @@
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
     regexp='^skin.patient_view.show_drugs_tab=false$'
     line='skin.patient_view.show_drugs_tab=true'
+
+- name: Set the portal properties to turn on user authorisation
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^authorization=false$'
+    line='authorization=true'
+
+- name: Set the portal properties to turn on AAF user authentication
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^authenticate=false$'
+    line='authenticate=aaf'
+
+- name: Update the portal properties with the service login initiation url
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.login-initiation-url='
+    line='aaf.login-initiation-url={{ service_login_initiation_url }}'
+  when: service_login_initiation_url is defined and service_login_initiation_url != "" and service_login_initiation_url != None
+ 
+- name: Update the portal properties with the service primary url
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.primary-url='
+    line='aaf.primary-url={{ service_primary_url }}'
+  when: service_primary_url is defined and service_primary_url != "" and service_primary_url != None
+
+- name: Update the portal properties with the service issuer
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.issuer='
+    line='aaf.issuer={{ service_issuer }}'
+  when: service_issuer is defined and service_issuer != "" and service_issuer != None
+
+- name: Update the portal properties with the service shared secret
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.shared-secret='
+    line='aaf.shared-secret={{ service_shared_secret }}'
+  when: service_shared_secret is defined and service_shared_secret != "" and service_shared_secret != None
 
 - name: Copy the example logging properties file
   copy: >
@@ -114,8 +166,25 @@
 
 - name: Remove the unpackaged cBioPortal seed database once imported
   file: >
-     path=/home/devel/cbioportal-seed.sql
-     state=absent
+    path=/home/devel/cbioportal-seed.sql
+    state=absent
+
+- name: Copy the cBioPortal jti claim database table seed file
+  copy: >
+    src=jti_claim.sql
+    dest=/home/devel/jti_claim.sql
+  tags:
+    - clean
+
+- name: Import the cBioPortal jti claim database table
+  shell: . /home/devel/.bash_profile && mysql --user="{{ cbioportal_database.username }}" --password="{{ cbioportal_database.password }}" cbioportal  < jti_claim.sql  
+  tags:
+    - clean
+
+- name: Remove the jti claim seed file once imported
+  file: >
+    path=/home/devel/jti_claim.sql
+    state=absent
 
 - name: Validate the sample study
   command: ./validateData.py -s ../../../test/scripts/test_data/study_es_0/ -n
