@@ -82,7 +82,7 @@ filter_groups_by_appname=true
 ## Settings to connect to Australian Access Federation (aaf) Rapid Connect
 aaf.login-initiation-url=
 aaf.primary-url=
-aaf.production-federation=true
+aaf.issuer=https://rapid.aaf.edu.au
 ## IMPORTANT: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\) otherwise the backslash will be silently dropped when the property is loaded
 aaf.shared-secret=
 ## settings to connect to googleplus auth infrastructure

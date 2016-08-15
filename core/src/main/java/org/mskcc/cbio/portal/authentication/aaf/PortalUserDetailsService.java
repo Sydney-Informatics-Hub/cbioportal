@@ -65,7 +65,7 @@ public class PortalUserDetailsService implements UserDetailsService {
 
     private final String sharedSecret;
     private final String primaryURL;
-    private final Boolean productionFederation;
+    private final String issuer;
     
     /**
      * Constructor.
@@ -80,21 +80,21 @@ public class PortalUserDetailsService implements UserDetailsService {
      * @param portalUserDAO ref to PortalUserDAO used to authenticate registered users in the database
      * @param sharedSecret secret shared between cBioPortal and AAF Rapid Connect for signing and verifying JWT
      * @param primaryURL HTTPS endpoint that accepts the POST request containing the assertion parameter
-     * @param productionFederation true if using the AAF productionFederation, false if using the test federation
+     * @param issuer issuer of the signed JWT, either 'https://rapid.aaf.edu.au' or 'https://rapid.test.aaf.edu.au'
      */
-    public PortalUserDetailsService(PortalUserDAO portalUserDAO, String sharedSecret, String primaryURL, 
-                                    Boolean productionFederation) {
+    public PortalUserDetailsService(PortalUserDAO portalUserDAO, String sharedSecret, String primaryURL, String issuer) 
+    {
         this.portalUserDAO = portalUserDAO;
         this.sharedSecret = sharedSecret;
         this.primaryURL = primaryURL;
-        this.productionFederation = productionFederation;
+        this.issuer = issuer;
     }
     
     @Override
     public UserDetails loadUserByUsername(String assertion) throws UsernameNotFoundException {
         String username = null;
         try {
-            AafJwtHandler jwtHandler = new AafJwtHandler(assertion, sharedSecret, primaryURL, productionFederation);
+            AafJwtHandler jwtHandler = new AafJwtHandler(assertion, sharedSecret, primaryURL, issuer);
             username = jwtHandler.getEmail();
         } catch (Exception e) {
             log.debug("Exception occurred whilst handling assertion: " + e + '\n' + ExceptionUtils.getStackTrace(e));

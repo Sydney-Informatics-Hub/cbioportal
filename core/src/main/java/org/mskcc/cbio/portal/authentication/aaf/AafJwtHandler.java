@@ -18,7 +18,7 @@ import java.util.Date;
  */
 class AafJwtHandler {
     
-    private static final Log log = LogFactory.getLog(PortalUserDetailsService.class);
+    private static final Log log = LogFactory.getLog(AafJwtHandler.class);
     
     private final SignedJWT signedJWT;
     private final String issuer;
@@ -34,18 +34,14 @@ class AafJwtHandler {
      * @param assertion signed JWT (JWS) assertion received from AAF Rapid Connect
      * @param sharedSecret shared secret between AAF Rapid Connect and the application for JWT signing and verification
      * @param primaryURL primary URL of application, provided as part of service registration
-     * @param productionFederation true if the service was registered to the production federation, false otherwise
+     * @param issuer issuer of the signed JWT, either 'https://rapid.aaf.edu.au' or 'https://rapid.test.aaf.edu.au'
      * @throws Exception thrown if signed JWT (JWS) validation failed or could not be parsed
      */
-    AafJwtHandler(String assertion, String sharedSecret, String primaryURL, Boolean productionFederation) 
+    AafJwtHandler(String assertion, String sharedSecret, String primaryURL, String issuer) 
         throws Exception {
         this.sharedSecret = sharedSecret;
         this.primaryURL = primaryURL;
-        if (productionFederation) {
-            this.issuer = "https://rapid.aaf.edu.au";
-        } else {
-            this.issuer = "https://rapid.test.aaf.edu.au";
-        }
+        this.issuer = issuer;
         this.signedJWT = SignedJWT.parse(assertion);
         validateSignedJwt(); // Ensure that the signed JWT (JWS) is validated
     }
@@ -74,7 +70,7 @@ class AafJwtHandler {
         
         final JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
         if (log.isDebugEnabled()) {
-            log.debug("loadByUsername(), JWT claims set: " + claimsSet.toString());
+            log.debug("validateSignedJwt(), JWT claims set: " + claimsSet.toString());
         }
         
         if (!claimsSet.getIssuer().equals(issuer)) {

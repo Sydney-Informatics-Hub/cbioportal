@@ -42,9 +42,9 @@ Unique URL for the application to inititation login with Rapid Connect, provided
 
 Primary URL of the application provided as part of service registration, e.g. https://westmead-cbioportal.intersect.org.au/cbioportal
 
-    service_production_federation
+    service_issuer
     
-Indicates whether the Rapid Connect production or test federation is being used, true if production, false if test
+Rapid connect environment used to issue the service, "https://rapid.aaf.edu.au" when in the production environment or "https://rapid.test.aaf.edu.au" when in the test environment
 
     service_shared_secret
     

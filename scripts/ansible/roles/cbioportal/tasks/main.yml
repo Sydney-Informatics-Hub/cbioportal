@@ -94,12 +94,12 @@
     line='aaf.primary-url={{ service_primary_url }}'
   when: service_primary_url is defined and service_primary_url != "" and service_primary_url != None
 
-- name: Update the portal properties with whether the service was registered with the production
+- name: Update the portal properties with the service issuer
   lineinfile: > 
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
-    regexp='^aaf.production-federation='
-    line='aaf.production-federation={{ service_production_federation }}'
-  when: service_production_federation is defined and service_production_federation != "" and service_production_federation != None
+    regexp='^aaf.issuer='
+    line='aaf.issuer={{ service_issuer }}'
+  when: service_issuer is defined and service_issuer != "" and service_issuer != None
 
 - name: Update the portal properties with the service shared secret
   lineinfile: > 

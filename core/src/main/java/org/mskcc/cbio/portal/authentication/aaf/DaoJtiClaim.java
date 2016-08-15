@@ -47,23 +47,20 @@ class DaoJtiClaim {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+        boolean claimIdExists = false;
         try {
             con = JdbcUtil.getDbConnection(DaoJtiClaim.class);
             pstmt = con.prepareStatement("SELECT count(*) FROM jti_claim WHERE JWT_ID=?");
             pstmt.setString(1, jwtId);
             rs = pstmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getInt(1) == 0) {
-                    return false;
-                }
-                return true;
-            } else {
-                return false;
-            }            
+            if (rs.next() && rs.getInt(1) != 0) {
+                claimIdExists = true;
+            }
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
             JdbcUtil.closeAll(DaoJtiClaim.class, con, pstmt, rs);
         }
+        return claimIdExists;
     }
 }

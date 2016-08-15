@@ -127,7 +127,7 @@
             <b:constructor-arg ref="portalUserDAO"/>
             <b:constructor-arg value="${aaf.shared-secret}"/>
             <b:constructor-arg value="${aaf.primary-url}"/>
-            <b:constructor-arg value="${aaf.production-federation}"/>
+            <b:constructor-arg value="${aaf.issuer}"/>
         </b:bean>
         
     <!-- end aaf beans -->
