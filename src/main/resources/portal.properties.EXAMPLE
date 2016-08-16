@@ -123,6 +123,7 @@ digitalslidearchive.meta.url=http://cancer.digitalslidearchive.net/local_php/get
 tumor_image.url=http://cbio.mskcc.org/cancergenomics/tcga-tumor-images/
 tcga_path_report.url=https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/{cancer.type}/bcr/nationwidechildrens.org/pathology_reports/reports/
 patient_view.use_internal_path_report=false
+patient_view.internal_path_report_root=
 
 # various url's
 segfile.url=http://cbio.mskcc.org/cancergenomics/gdac-portal/seg/

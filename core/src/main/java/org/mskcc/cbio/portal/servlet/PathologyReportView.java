@@ -37,6 +37,7 @@ import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.util.AccessControl;
+import org.mskcc.cbio.portal.util.GlobalProperties;
 import org.mskcc.cbio.portal.util.SpringUtil;
 import org.mskcc.cbio.portal.util.XDebug;
 
@@ -64,8 +65,8 @@ public class PathologyReportView extends HttpServlet {
     // class which process access control to cancer studies
     private AccessControl accessControl;
 
-    // ToDo: enable root of data directory to be configurable
-    private static final String DATA_DIRECTORY = "/data";
+    // root directory of internal pathology reports or null if undefined
+    private static final String DATA_DIRECTORY = GlobalProperties.getInternalPathReportRoot();
     
     /**
      * Initializes the servlet.
@@ -133,6 +134,11 @@ public class PathologyReportView extends HttpServlet {
         if (accessControl.isAccessibleCancerStudy(cancerStudyIdentifier).size() != 1) {
             request.setAttribute(ERROR,
                 "You are not authorized to access the cancer study with id: '" + cancerStudyIdentifier + "'. ");
+            return false;
+        }
+        
+        if (DATA_DIRECTORY == null) {
+            request.setAttribute(ERROR, "The internal location of pathology reports is undefined");
             return false;
         }
         

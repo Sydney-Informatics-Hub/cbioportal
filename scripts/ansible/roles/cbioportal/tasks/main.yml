@@ -74,6 +74,13 @@
     regexp='^patient_view.use_internal_path_report='
     line='patient_view.use_internal_path_report=true'
 
+- name: Update the portal properties with the internal pathology report root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_path_report_root='
+    line='patient_view.internal_path_report_root={{ internal_path_report_root }}'
+  when: internal_path_report_root is defined and internal_path_report_root != "" and internal_path_report_root != None
+
 - name: Set the portal properties to turn on user authorisation
   lineinfile: >
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
