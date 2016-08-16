@@ -95,6 +95,7 @@ public class PathologyReportView extends HttpServlet {
             validateRequest(request);
             if (request.getAttribute(ERROR)!=null) {
                 // ToDo: return 404 instead of error message so that a file resource is always returned (not file or html)
+                // ToDo: alternatively fix the styling as it current tries to get the images and files from the relative current directory, rather than the web apps one
                 forwardToErrorPage(request, response, (String)request.getAttribute(ERROR), xdebug);
             } else {
                 File pathologyReport = new File(DATA_DIRECTORY, getRequestedPath(request));
