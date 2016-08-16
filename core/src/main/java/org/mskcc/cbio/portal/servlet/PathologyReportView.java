@@ -39,9 +39,7 @@ import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
 import org.mskcc.cbio.portal.util.SpringUtil;
-import org.mskcc.cbio.portal.util.XDebug;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -60,7 +58,8 @@ import java.net.URLDecoder;
  */
 public class PathologyReportView extends HttpServlet {
     private static Logger logger = Logger.getLogger(PathologyReportView.class);
-    public static final String ERROR = "error";
+    public static final String ERROR_CODE = "error_code";
+    public static final String ERROR_MSG = "error_msg";
 
     // class which process access control to cancer studies
     private AccessControl accessControl;
@@ -87,26 +86,24 @@ public class PathologyReportView extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-        XDebug xdebug = new XDebug( request );
-        request.setAttribute(QueryBuilder.XDEBUG_OBJECT, xdebug);
-        
+        throws ServletException, IOException {        
         try {            
             validateRequest(request);
-            if (request.getAttribute(ERROR)!=null) {
-                // ToDo: return 404 instead of error message so that a file resource is always returned (not file or html)
-                // ToDo: alternatively fix the styling as it current tries to get the images and files from the relative current directory, rather than the web apps one
-                forwardToErrorPage(request, response, (String)request.getAttribute(ERROR), xdebug);
+            if (request.getAttribute(ERROR_CODE)!=null) {
+                response.sendError(Integer.parseInt((String) request.getAttribute(ERROR_CODE)), 
+                    (String) request.getAttribute(ERROR_MSG));
             } else {
                 File pathologyReport = new File(DATA_DIRECTORY, getRequestedPath(request));
                 serveFile(response, pathologyReport);
             }
         } catch (DaoException e) {
-            xdebug.logMsg(this, "Got Database Exception: " + e.getMessage());
-            forwardToErrorPage(request, response, "An error occurred while trying to connect to the database.", xdebug);
+            logger.error("Got Database Exception while processing request for pathology report.", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+                "An error occurred while trying to connect to the database.");
         } catch (NoSuchFileException e) {
-            xdebug.logMsg(this, "Got No Such File Exception: " + e.getMessage());
-            forwardToErrorPage(request, response, "The requested pathology report could not be located.", xdebug);
+            logger.error("Got No Such File Exception while processing request for pathology report.", e);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, 
+                "The requested pathology report could not be located.");
         }
     }
     
@@ -114,10 +111,16 @@ public class PathologyReportView extends HttpServlet {
         return URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
     }
     
+    private void setError(HttpServletRequest request, int httpStatusCode, String errorMessage) {
+        request.setAttribute(ERROR_CODE, Integer.toString(httpStatusCode));
+        request.setAttribute(ERROR_MSG, errorMessage);
+    }
+    
     private boolean validateRequest(HttpServletRequest request) throws IOException, DaoException {
+        // Todo: incorporate some form of path validation that the URL file path is of the expected structure (e.g. study_es_0/TCGA-A1-A0SB/TCGA-A1-A0SB-01.pdf) 
         final String path = getRequestedPath(request);
-
         String cancerStudyID = path.split("/")[0];
+        
         CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId(cancerStudyID);
         if (cancerStudy==null) {
             try {
@@ -127,27 +130,26 @@ public class PathologyReportView extends HttpServlet {
             }
         }
         if (cancerStudy==null) {
-            request.setAttribute(ERROR, "No such cancer study with id: '" + cancerStudyID + "'.");
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "No such cancer study with id '" + cancerStudyID + "'.");
             return false;
         }
         
         String cancerStudyIdentifier = cancerStudy.getCancerStudyStableId();
         if (accessControl.isAccessibleCancerStudy(cancerStudyIdentifier).size() != 1) {
-            request.setAttribute(ERROR,
-                "You are not authorized to access the cancer study with id: '" + cancerStudyIdentifier + "'. ");
+            setError(request, HttpServletResponse.SC_FORBIDDEN, 
+                "You are not authorized to access the cancer study with id '" + cancerStudyIdentifier + "'.");
             return false;
         }
         
         if (DATA_DIRECTORY == null) {
-            request.setAttribute(ERROR, "The internal location of pathology reports is undefined");
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of pathology reports is undefined");
             return false;
         }
         
-        // Todo: incorporate some form of path validation so that arbitrary paths (such as study_id/../../sensitive.file) can't result in non-pathology report files being returned 
         File requestedFile = new File(DATA_DIRECTORY, path);
         if (!requestedFile.exists() || requestedFile.isDirectory()) {
-            request.setAttribute(ERROR, "Unable to locate pathology report: '" + requestedFile.getName() + "' " +
-                "for the cancer study with id: '" + cancerStudyIdentifier + "'.");
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate pathology report '" 
+                + requestedFile.getName() + "' " + "for the cancer study with id '" + cancerStudyIdentifier + "'.");
             return false;
         }
         
@@ -160,16 +162,6 @@ public class PathologyReportView extends HttpServlet {
         response.setHeader("Content-Length", String.valueOf(file.length()));
         response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
         Files.copy(file.toPath(), response.getOutputStream());
-    }    
-    
-    private void forwardToErrorPage(HttpServletRequest request, HttpServletResponse response,
-                                    String userMessage, XDebug xdebug)
-            throws ServletException, IOException {
-        request.setAttribute("xdebug_object", xdebug);
-        request.setAttribute(QueryBuilder.USER_ERROR_MESSAGE, userMessage);
-        RequestDispatcher dispatcher =
-                getServletContext().getRequestDispatcher("/WEB-INF/jsp/error.jsp");
-        dispatcher.forward(request, response);
     }
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
