@@ -35,7 +35,11 @@ package org.mskcc.cbio.portal.servlet;
 import org.apache.log4j.Logger;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
+import org.mskcc.cbio.portal.dao.DaoPatient;
+import org.mskcc.cbio.portal.dao.DaoSample;
 import org.mskcc.cbio.portal.model.CancerStudy;
+import org.mskcc.cbio.portal.model.Patient;
+import org.mskcc.cbio.portal.model.Sample;
 import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
 import org.mskcc.cbio.portal.util.SpringUtil;
@@ -49,6 +53,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.net.URLDecoder;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * A servlet to respond to requests for Pathology Report files for cancer studies.
@@ -117,27 +122,39 @@ public class PathologyReportView extends HttpServlet {
     }
     
     private boolean validateRequest(HttpServletRequest request) throws IOException, DaoException {
-        // Todo: incorporate some form of path validation that the URL file path is of the expected structure (e.g. study_es_0/TCGA-A1-A0SB/TCGA-A1-A0SB-01.pdf) 
-        final String path = getRequestedPath(request);
-        String cancerStudyID = path.split("/")[0];
-        
-        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId(cancerStudyID);
-        if (cancerStudy==null) {
-            try {
-                cancerStudy = DaoCancerStudy.getCancerStudyByInternalId(Integer.parseInt(cancerStudyID));
-            } catch(NumberFormatException ex) {
-                logger.debug("PathologyReportView.validateRequest(): " + ex.getMessage());
-            }
+        final String requestedPath = getRequestedPath(request);
+        final String[] path = requestedPath.split("/");
+        if (path.length != 3) {
+            setError(request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to process requested pathology " +
+                "report path. Ensure it is in the format cbioportal/pathology_report/study_id/patient_id/sample_id.pdf");
+            return false;
         }
-        if (cancerStudy==null) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "No such cancer study with id '" + cancerStudyID + "'.");
+
+        final String cancerStudyId = path[0];
+        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId(cancerStudyId);
+        if (cancerStudy == null) {
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "No such cancer study with id '" + cancerStudyId + "'.");
+            return false;
+        }
+        if (accessControl.isAccessibleCancerStudy(cancerStudyId).size() != 1) {
+            setError(request, HttpServletResponse.SC_FORBIDDEN, 
+                "You are not authorized to access the cancer study with id '" + cancerStudyId + "'.");
             return false;
         }
         
-        String cancerStudyIdentifier = cancerStudy.getCancerStudyStableId();
-        if (accessControl.isAccessibleCancerStudy(cancerStudyIdentifier).size() != 1) {
-            setError(request, HttpServletResponse.SC_FORBIDDEN, 
-                "You are not authorized to access the cancer study with id '" + cancerStudyIdentifier + "'.");
+        final String patientId = path[1];
+        Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), patientId);
+        if (patient == null) {
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "No such patient with id '" + patientId + "' " +
+                "within the cancer study with id '" + cancerStudyId + "'");
+            return false;
+        }
+        
+        final String sampleId = FilenameUtils.removeExtension(path[2]);
+        Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getInternalId(), sampleId, false);
+        if (sample == null) {
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "No such sample with id '" + sampleId + "' " +
+                "within the cancer study with id '" + cancerStudyId + "'");
             return false;
         }
         
@@ -145,11 +162,10 @@ public class PathologyReportView extends HttpServlet {
             setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of pathology reports is undefined");
             return false;
         }
-        
-        File requestedFile = new File(DATA_DIRECTORY, path);
+        File requestedFile = new File(DATA_DIRECTORY, requestedPath);
         if (!requestedFile.exists() || requestedFile.isDirectory()) {
             setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate pathology report '" 
-                + requestedFile.getName() + "' " + "for the cancer study with id '" + cancerStudyIdentifier + "'.");
+                + requestedFile.getName() + "' " + "for the cancer study with id '" + cancerStudyId + "'.");
             return false;
         }
         
