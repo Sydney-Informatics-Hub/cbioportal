@@ -41,6 +41,12 @@
     dest=/etc/logrotate.d/httpd.logrotate
   become: yes
 
+- name: Create the internal pathology report root directory if it doesn't exist
+  file: >
+    path={{ internal_path_report_root }}
+    state=directory
+    mode=0755
+
 - name: Copy the example global confirguration properties file
   copy: >
     src={{ cbioportal_root }}/src/main/resources/portal.properties.EXAMPLE

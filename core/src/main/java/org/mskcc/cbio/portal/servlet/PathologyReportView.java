@@ -98,7 +98,7 @@ public class PathologyReportView extends HttpServlet {
                 response.sendError(Integer.parseInt((String) request.getAttribute(ERROR_CODE)), 
                     (String) request.getAttribute(ERROR_MSG));
             } else {
-                File pathologyReport = new File(DATA_DIRECTORY, getRequestedPath(request));
+                File pathologyReport = getRequestedFile(request);
                 serveFile(response, pathologyReport);
             }
         } catch (DaoException e) {
@@ -114,6 +114,12 @@ public class PathologyReportView extends HttpServlet {
     
     private String getRequestedPath(HttpServletRequest request) throws IOException{
         return URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
+    }
+    
+    private File getRequestedFile(HttpServletRequest request) throws IOException {
+        // Convert from the expected url path 'studyId/patientId/sampleId.pdf' to the expected filesystem path 'studyId.patientId.sampleId.pdf'
+        final String convertedPath = getRequestedPath(request).replace("/", ".");
+        return new File(DATA_DIRECTORY, convertedPath);
     }
     
     private void setError(HttpServletRequest request, int httpStatusCode, String errorMessage) {
@@ -162,7 +168,7 @@ public class PathologyReportView extends HttpServlet {
             setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of pathology reports is undefined");
             return false;
         }
-        File requestedFile = new File(DATA_DIRECTORY, requestedPath);
+        File requestedFile = getRequestedFile(request);
         if (!requestedFile.exists() || requestedFile.isDirectory()) {
             setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate pathology report '" 
                 + requestedFile.getName() + "' " + "for the cancer study with id '" + cancerStudyId + "'.");

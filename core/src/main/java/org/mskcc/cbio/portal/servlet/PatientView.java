@@ -486,14 +486,15 @@ public class PatientView extends HttpServlet {
         
         // path report
         if (GlobalProperties.useInternalPathReports()) {
+            // Expected url path 'studyId/patientId/sampleId.pdf' maps to expected filesystem path 'studyId.patientId.sampleId.pdf'
             final String reportBaseURL = "pathology_report/" + cancerStudy.getCancerStudyStableId() 
                 + "/" + patientId + "/";
             final String reportBasePath = GlobalProperties.getInternalPathReportRoot() + "/" 
-                + cancerStudy.getCancerStudyStableId() + "/" + patientId + "/";
+                + cancerStudy.getCancerStudyStableId() + "." + patientId + ".";
             if (isPatientView) {
                 Map<String,String> sampleReportUrls = new HashMap<String,String>();
                 for (String sample : samples) {
-                    final String reportFileName = sample + ".pdf"; 
+                    final String reportFileName = sample + ".pdf";
                     if (new File(reportBasePath + reportFileName).exists()) {
                         sampleReportUrls.put(sample, reportBaseURL + reportFileName);
                     }
