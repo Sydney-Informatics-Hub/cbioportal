@@ -662,12 +662,8 @@ public class GlobalProperties {
 
     public static boolean useInternalPathReports()
     {
-        boolean useInternalPathologyReport = false;
-        String propertyFlag = properties.getProperty(PATIENT_VIEW_USE_INTERNAL_PATH_REPORT);
-        if (propertyFlag != null) {
-            useInternalPathologyReport = Boolean.parseBoolean(propertyFlag);
-        }
-        return useInternalPathologyReport;
+        String propertyFlag = properties.getProperty(PATIENT_VIEW_USE_INTERNAL_PATH_REPORT, "false");
+        return Boolean.parseBoolean(propertyFlag);
     }
     
     public static String getInternalPathReportRoot()
