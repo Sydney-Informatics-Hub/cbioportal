@@ -51,7 +51,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.net.URLDecoder;
 import org.apache.commons.io.FilenameUtils;
 
@@ -63,8 +62,8 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class PathologyReportView extends HttpServlet {
     private static Logger logger = Logger.getLogger(PathologyReportView.class);
-    public static final String ERROR_CODE = "error_code";
-    public static final String ERROR_MSG = "error_msg";
+    private static final String ERROR_CODE = "error_code";
+    private static final String ERROR_MSG = "error_msg";
 
     // class which process access control to cancer studies
     private AccessControl accessControl;
@@ -93,22 +92,17 @@ public class PathologyReportView extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {        
         try {            
-            validateRequest(request);
-            if (request.getAttribute(ERROR_CODE)!=null) {
-                response.sendError(Integer.parseInt((String) request.getAttribute(ERROR_CODE)), 
-                    (String) request.getAttribute(ERROR_MSG));
-            } else {
+            if (validRequest(request)) {
                 File pathologyReport = getRequestedFile(request);
                 serveFile(response, pathologyReport);
+            } else {
+                response.sendError(Integer.parseInt((String) request.getAttribute(ERROR_CODE)),
+                    (String) request.getAttribute(ERROR_MSG));
             }
         } catch (DaoException e) {
             logger.error("Got Database Exception while processing request for pathology report.", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
                 "An error occurred while trying to connect to the database.");
-        } catch (NoSuchFileException e) {
-            logger.error("Got No Such File Exception while processing request for pathology report.", e);
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, 
-                "The requested pathology report could not be located.");
         }
     }
     
@@ -127,7 +121,7 @@ public class PathologyReportView extends HttpServlet {
         request.setAttribute(ERROR_MSG, errorMessage);
     }
     
-    private boolean validateRequest(HttpServletRequest request) throws IOException, DaoException {
+    private boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
         final String requestedPath = getRequestedPath(request);
         final String[] path = requestedPath.split("/");
         if (path.length != 3) {

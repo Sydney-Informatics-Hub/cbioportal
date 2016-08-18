@@ -46,6 +46,8 @@
     path={{ internal_path_report_root }}
     state=directory
     mode=0755
+  become: yes
+  when: internal_path_report_root is defined and internal_path_report_root != "" and internal_path_report_root != None
 
 - name: Copy the example global confirguration properties file
   copy: >
