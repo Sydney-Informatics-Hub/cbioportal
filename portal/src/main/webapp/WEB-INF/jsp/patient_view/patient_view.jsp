@@ -87,6 +87,7 @@ jsonClinicalAttributes = jsonMapper.writeValueAsString((Map<String,String>)reque
 boolean showTimeline = (Boolean)request.getAttribute("has_timeline_data");
 
 String pathReportUrl = (String)request.getAttribute(PatientView.PATH_REPORT_URL);
+String pathReportUrl = (String)request.getAttribute(PatientView.CA125_REPORT_URL);
 
 String oncokbUrl = (String)GlobalProperties.getOncoKBUrl();
 String oncokbGeneStatus = (String)GlobalProperties.getOncoKBGeneStatus();
@@ -243,6 +244,12 @@ if (patientViewError!=null) {
     <%if(pathReportUrl!=null){%>
     <div class="patient-section" id="tab_path-report">
         <%@ include file="path_report.jsp" %>
+    </div>
+    <%}%>
+
+    <%if(ca125ReportUrl!=null){%>
+    <div class="patient-section" id="tab_ca125-report">
+        <%@ include file="ca125_report.jsp" %>
     </div>
     <%}%>
 
