@@ -36,6 +36,7 @@ package org.mskcc.cbio.portal.servlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -484,12 +485,39 @@ public class PatientView extends HttpServlet {
         }
         
         // path report
-        String typeOfCancer = cancerStudy.getTypeOfCancerId();
-        if (patientId!=null && patientId.startsWith("TCGA-")) {
-            String pathReport = getTCGAPathReport(typeOfCancer, patientId);
-            if (pathReport!=null) {
-                request.setAttribute(PATH_REPORT_URL, pathReport);
+        if (GlobalProperties.useInternalPathReports()) {
+            // Expected url path 'studyId/patientId/sampleId.pdf' maps to expected filesystem path 'studyId.patientId.sampleId.pdf'
+            final String reportBaseURL = "pathology_report/" + cancerStudy.getCancerStudyStableId() 
+                + "/" + patientId + "/";
+            final String reportBasePath = GlobalProperties.getInternalPathReportRoot() + "/" 
+                + cancerStudy.getCancerStudyStableId() + "." + patientId + ".";
+            if (isPatientView) {
+                Map<String,String> sampleReportUrls = new HashMap<String,String>();
+                for (String sample : samples) {
+                    final String reportFileName = sample + ".pdf";
+                    if (new File(reportBasePath + reportFileName).exists()) {
+                        sampleReportUrls.put(sample, reportBaseURL + reportFileName);
+                    }
+                }
+                if (!sampleReportUrls.isEmpty()) {
+                    //ToDo: send across the map of all sample URLs and handle the map within the patient_view.jsp and the path_report.jsp
+                    final String firstSampleReport = sampleReportUrls.entrySet().iterator().next().getValue();
+                    request.setAttribute(PATH_REPORT_URL, firstSampleReport);
+                }
+            } else {
+                final String reportFileName = sampleId + ".pdf";
+                if (new File(reportBasePath + reportFileName).exists()) {
+                    request.setAttribute(PATH_REPORT_URL, reportBaseURL + reportFileName);
+                }
             }
+        } else {
+            String typeOfCancer = cancerStudy.getTypeOfCancerId();
+            if (patientId!=null && patientId.startsWith("TCGA-")) {
+                String pathReport = getTCGAPathReport(typeOfCancer, patientId);
+                if (pathReport!=null) {
+                    request.setAttribute(PATH_REPORT_URL, pathReport);
+                }
+            }            
         }
     }
     

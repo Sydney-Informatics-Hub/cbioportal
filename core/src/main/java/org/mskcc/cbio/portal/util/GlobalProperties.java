@@ -124,6 +124,8 @@ public class GlobalProperties {
     public static final String PATIENT_VIEW_DIGITAL_SLIDE_META_URL = "digitalslidearchive.meta.url";
     public static final String PATIENT_VIEW_TCGA_PATH_REPORT_URL = "tcga_path_report.url";
     public static final String ONCOKB_URL = "oncokb.url";
+    public static final String PATIENT_VIEW_USE_INTERNAL_PATH_REPORT = "patient_view.use_internal_path_report";
+    public static final String PATIENT_VIEW_INTERNAL_PATH_REPORT_ROOT = "patient_view.internal_path_report_root";
 
     // properties for showing the right logo in the header_bar and default logo
     public static final String SKIN_RIGHT_LOGO = "skin.right_logo";
@@ -658,6 +660,17 @@ public class GlobalProperties {
         return new String[] {url.replace("{cancer.type}", typeOfCancer)};
     }
 
+    public static boolean useInternalPathReports()
+    {
+        String propertyFlag = properties.getProperty(PATIENT_VIEW_USE_INTERNAL_PATH_REPORT, "false");
+        return Boolean.parseBoolean(propertyFlag);
+    }
+    
+    public static String getInternalPathReportRoot()
+    {
+        return properties.getProperty(PATIENT_VIEW_INTERNAL_PATH_REPORT_ROOT);
+    }
+    
     // function for getting the custom tabs for the header
     public static String[] getCustomHeaderTabs(){
         String customPagesString = GlobalProperties.getProperty(SKIN_CUSTOM_HEADER_TABS);
