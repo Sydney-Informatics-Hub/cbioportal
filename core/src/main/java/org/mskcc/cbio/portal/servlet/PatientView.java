@@ -526,8 +526,8 @@ public class PatientView extends HttpServlet {
     
     private void setCA125ReportURL(CancerStudy cancerStudy, String patientId, HttpServletRequest request) {
         final String ca125BaseURL = "ca125_report/" + cancerStudy.getCancerStudyStableId() + "/" + patientId + "/";
-        final String ca125BasePath = GlobalProperties.getInternalPathReportRoot() + "/" + cancerStudy.getCancerStudyStableId() + "." + patientId + ".";
-        final String ca125FileName = patientId + "_CA125.pdf";
+        final String ca125BasePath = GlobalProperties.getInternalPathReportRoot();
+        final String ca125FileName = cancerStudy.getCancerStudyStableId() + '_' + patientId + "_CA125.pdf";
         final File ca125File = new File(ca125BasePath, ca125FileName);
         if (ca125File.exists()) {
             request.setAttribute(PATH_REPORT_URL, ca125BaseURL + ca125FileName);
