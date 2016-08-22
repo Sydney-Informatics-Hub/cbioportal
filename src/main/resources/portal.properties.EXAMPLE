@@ -122,7 +122,7 @@ digitalslidearchive.iframe.url=http://cancer.digitalslidearchive.net/index_mskcc
 digitalslidearchive.meta.url=http://cancer.digitalslidearchive.net/local_php/get_slide_list_from_db_groupid_not_needed.php?slide_name_filter=
 tumor_image.url=http://cbio.mskcc.org/cancergenomics/tcga-tumor-images/
 tcga_path_report.url=https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/{cancer.type}/bcr/nationwidechildrens.org/pathology_reports/reports/
-patient_view.use_internal_path_report=false
+patient_view.use_internal_path_report=true
 patient_view.internal_path_report_root=
 
 # various url's

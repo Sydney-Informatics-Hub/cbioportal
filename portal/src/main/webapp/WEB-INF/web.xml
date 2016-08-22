@@ -449,6 +449,15 @@
     </servlet-mapping>
     
     <servlet>
+        <servlet-name>ca125_report_view</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.CA125ReportView</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ca125_report_view</servlet-name>
+        <url-pattern>/ca125_report/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>DrugsJSON</servlet-name>
         <servlet-class>org.mskcc.cbio.portal.servlet.DrugsJSON</servlet-class>
     </servlet>
