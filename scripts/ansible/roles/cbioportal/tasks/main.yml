@@ -9,6 +9,13 @@
     group=devel
     mode=0755
 
+- name: Add the devel user to the tomcat group
+  user: >
+    name=devel
+    groups=tomcat
+    append=yes
+  become: yes
+
 - name: Pull source code from git
   git: >
     repo=https://github.com/IntersectAustralia/cbioportal.git
@@ -262,6 +269,7 @@
     enabled: yes
   become: yes
 
+# Todo: copy war file without using sudo access, since devel is part of tomcat group
 - name: Deploy the cBioPortal WAR file
   copy: >
     src={{ cbioportal_root }}/portal/target/cbioportal.war
@@ -290,3 +298,10 @@
 
 - name: Wait for 10 minutes so that Tomcat can finish initialising cBioPortal
   pause: minutes=10
+
+- name: Ensure the portal log file has the tomcat owner/group
+  file: >
+    path=/var/log/tomcat/public-portal.log
+    owner=tomcat
+    group=tomcat
+  become: yes
