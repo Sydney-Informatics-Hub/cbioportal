@@ -107,7 +107,7 @@ public class PatientView extends HttpServlet {
     public static final String CLINICAL_ATTRIBUTES = "clinical_attributes";
     public static final String TISSUE_IMAGES = "tissue_images";
     public static final String PATH_REPORT_URL = "path_report_url";
-    public static final String CA125_REPORT_URL = "ca125_report_url";
+    public static final String CA125_PLOT_URL = "ca125_plot_url";
     public static final String CLINICAL_ATTRIBUTE_OTHER_PAPTEINT_ID = "OTHER_PATIENT_ID";
     public static final String CLINICAL_ATTRIBUTE_OTHER_SAMPLE_ID = "OTHER_SAMPLE_ID";
     
@@ -525,12 +525,12 @@ public class PatientView extends HttpServlet {
     }
     
     private void setCA125ReportURL(CancerStudy cancerStudy, String patientId, HttpServletRequest request) {
-        final String ca125BaseURL = "ca125_report/" + cancerStudy.getCancerStudyStableId() + "/" + patientId + "/";
-        final String ca125BasePath = GlobalProperties.getInternalPathReportRoot();
-        final String ca125FileName = cancerStudy.getCancerStudyStableId() + '_' + patientId + "_CA125.pdf";
-        final File ca125File = new File(ca125BasePath, ca125FileName);
+        final String ca125URL = "ca125_plot/" + cancerStudy.getCancerStudyStableId() + "/" + patientId + "/CA125.pdf";
+        final String ca125RootDir = GlobalProperties.getInternalCa125PlotRoot();
+        final String ca125FileName = cancerStudy.getCancerStudyStableId() + '.' + patientId + ".CA125.pdf";
+        final File ca125File = new File(ca125RootDir, ca125FileName);
         if (ca125File.exists()) {
-            request.setAttribute(PATH_REPORT_URL, ca125BaseURL + ca125FileName);
+            request.setAttribute(CA125_PLOT_URL, ca125URL);
         }
     }
     

@@ -126,6 +126,7 @@ public class GlobalProperties {
     public static final String ONCOKB_URL = "oncokb.url";
     public static final String PATIENT_VIEW_USE_INTERNAL_PATH_REPORT = "patient_view.use_internal_path_report";
     public static final String PATIENT_VIEW_INTERNAL_PATH_REPORT_ROOT = "patient_view.internal_path_report_root";
+    public static final String PATIENT_VIEW_INTERNAL_CA125_PLOT_ROOT = "patient_view.internal_ca125_plot_root";
 
     // properties for showing the right logo in the header_bar and default logo
     public static final String SKIN_RIGHT_LOGO = "skin.right_logo";
@@ -669,6 +670,11 @@ public class GlobalProperties {
     public static String getInternalPathReportRoot()
     {
         return properties.getProperty(PATIENT_VIEW_INTERNAL_PATH_REPORT_ROOT);
+    }
+    
+    public static String getInternalCa125PlotRoot()
+    {
+        return properties.getProperty(PATIENT_VIEW_INTERNAL_CA125_PLOT_ROOT);
     }
     
     // function for getting the custom tabs for the header

@@ -36,10 +36,8 @@ import org.apache.log4j.Logger;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoPatient;
-import org.mskcc.cbio.portal.dao.DaoSample;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.Patient;
-import org.mskcc.cbio.portal.model.Sample;
 import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
 import org.mskcc.cbio.portal.util.SpringUtil;
@@ -52,32 +50,31 @@ import java.io.IOException;
 import java.io.File;
 import java.nio.file.Files;
 import java.net.URLDecoder;
-import org.apache.commons.io.FilenameUtils;
 
 /**
- * A servlet to respond to requests for Pathology Report files for cancer studies.
+ * A servlet to respond to requests for CA125 Plot files for cancer studies.
  * Adapted from CancerStudyView.java
  * 
  */
-public class CA125ReportView extends HttpServlet {
+public class CA125PlotView extends HttpServlet {
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static Logger logger = Logger.getLogger(CA125ReportView.class);
+	private static Logger logger = Logger.getLogger(CA125PlotView.class);
     private static final String ERROR_CODE = "error_code";
     private static final String ERROR_MSG = "error_msg";
 
     // class which process access control to cancer studies
     private AccessControl accessControl;
 
-    // root directory of internal pathology reports or null if undefined
-    private static final String DATA_DIRECTORY = GlobalProperties.getInternalPathReportRoot();
+    // root directory of internal CA125 plots or null if undefined
+    private static final String DATA_DIRECTORY = GlobalProperties.getInternalCa125PlotRoot();
     
     /**
      * Initializes the servlet.
      *
-     * @throws ServletException Serlvet Init Error.
+     * @throws ServletException Servlet Init Error.
      */
     @Override
     public void init() throws ServletException {
@@ -103,7 +100,7 @@ public class CA125ReportView extends HttpServlet {
                     (String) request.getAttribute(ERROR_MSG));
             }
         } catch (DaoException e) {
-            logger.error("Got Database Exception while processing request for pathology report.", e);
+            logger.error("Got Database Exception while processing request for CA125 plot.", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
                 "An error occurred while trying to connect to the database.");
         }
@@ -114,8 +111,8 @@ public class CA125ReportView extends HttpServlet {
     }
     
     private File getRequestedFile(HttpServletRequest request) throws IOException {
-        // Convert from the expected url path 'studyId/patientId/sampleId.pdf' to the expected filesystem path 'studyId.patientId.sampleId.pdf'
-        final String convertedPath = getRequestedPath(request);
+        // Convert from the expected url path 'studyId/patientId/CA125.pdf' to the expected filesystem path 'studyId.patientId.CA125.pdf'
+        final String convertedPath = getRequestedPath(request).replace("/", ".");;
         return new File(DATA_DIRECTORY, convertedPath);
     }
     
@@ -128,8 +125,8 @@ public class CA125ReportView extends HttpServlet {
         final String requestedPath = getRequestedPath(request);
         final String[] path = requestedPath.split("/");
         if (path.length != 3) {
-            setError(request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to process requested pathology " +
-                "report path. Ensure it is in the format cbioportal/pathology_report/study_id/patient_id/sample_id.pdf");
+            setError(request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to process requested CA125 plot " +
+                "path. Ensure it is in the format cbioportal/ca125_plot/study_id/patient_id/CA125.pdf");
             return false;
         }
 
@@ -152,22 +149,14 @@ public class CA125ReportView extends HttpServlet {
                 "within the cancer study with id '" + cancerStudyId + "'");
             return false;
         }
-        
-        final String sampleId = FilenameUtils.removeExtension(path[2]);
-        Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getInternalId(), sampleId, false);
-        if (sample == null) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "No such sample with id '" + sampleId + "' " +
-                "within the cancer study with id '" + cancerStudyId + "'");
-            return false;
-        }
-        
+                
         if (DATA_DIRECTORY == null) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of pathology reports is undefined");
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of CA125 plots is undefined");
             return false;
         }
         File requestedFile = getRequestedFile(request);
         if (!requestedFile.exists() || requestedFile.isDirectory()) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate pathology report '" 
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate CA125 plot '" 
                 + requestedFile.getName() + "' " + "for the cancer study with id '" + cancerStudyId + "'.");
             return false;
         }
@@ -176,7 +165,7 @@ public class CA125ReportView extends HttpServlet {
     }
     
     private void serveFile(HttpServletResponse response, File file) throws IOException{
-        logger.info("PathologyReportView.serveFile(): Serving file: " + file.getPath());
+        logger.info("CA125PlotView.serveFile(): Serving file: " + file.getPath());
         response.setHeader("Content-Type", getServletContext().getMimeType(file.getName()));
         response.setHeader("Content-Length", String.valueOf(file.length()));
         response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");

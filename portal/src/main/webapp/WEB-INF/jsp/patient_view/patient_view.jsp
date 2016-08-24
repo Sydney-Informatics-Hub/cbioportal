@@ -87,7 +87,8 @@ jsonClinicalAttributes = jsonMapper.writeValueAsString((Map<String,String>)reque
 boolean showTimeline = (Boolean)request.getAttribute("has_timeline_data");
 
 String pathReportUrl = (String)request.getAttribute(PatientView.PATH_REPORT_URL);
-String pathReportUrl = (String)request.getAttribute(PatientView.CA125_REPORT_URL);
+String ca125PlotUrl = (String)request.getAttribute(PatientView.CA125_PLOT_URL);
+boolean showCa125 = isPatientView && ca125PlotUrl!=null;
 
 String oncokbUrl = (String)GlobalProperties.getOncoKBUrl();
 String oncokbGeneStatus = (String)GlobalProperties.getOncoKBGeneStatus();
@@ -205,6 +206,10 @@ if (patientViewError!=null) {
     <li><a id="link-path-report" href='#tab_path-report' class='patient-tab'>Pathology Report</a></li>
     <%}%>
 
+    <%if(showCa125){%>
+    <li><a id="link-ca125-plot" href='#tab_ca125-plot' class='patient-tab'>CA125 Plot</a></li>
+    <%}%>
+
     <%if(showPathways){%>
     <li><a id="link-pathways" href='#tab_pathways' class='patient-tab'>Network</a></li>
     <%}%>
@@ -247,9 +252,9 @@ if (patientViewError!=null) {
     </div>
     <%}%>
 
-    <%if(ca125ReportUrl!=null){%>
-    <div class="patient-section" id="tab_ca125-report">
-        <%@ include file="ca125_report.jsp" %>
+    <%if(showCa125){%>
+    <div class="patient-section" id="tab_ca125-plot">
+        <%@ include file="ca125_plot.jsp" %>
     </div>
     <%}%>
 
