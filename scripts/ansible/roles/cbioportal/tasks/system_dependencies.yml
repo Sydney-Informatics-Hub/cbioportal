@@ -19,6 +19,7 @@
     
 - name: Install required Pip libraries
   pip: name={{item}}
+  become: yes
   with_items:
     - requests
     - paramiko
