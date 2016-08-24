@@ -10,6 +10,8 @@
     - iptables-services
     - python-pip 
     - python-devel
+    - openssl-devel
+    - libffi-devel
 
 - name: Ensure the JAVA_HOME environment variable is set to the JDK installation
   lineinfile: >
