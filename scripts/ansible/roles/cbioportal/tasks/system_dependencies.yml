@@ -8,9 +8,17 @@
     - unzip
     - gzip
     - iptables-services
+    - python-pip 
+    - python-devel
 
 - name: Ensure the JAVA_HOME environment variable is set to the JDK installation
   lineinfile: >
     dest=/home/devel/.bash_profile
     regexp='^export JAVA_HOME='
     line='export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk'
+    
+- name: Install required Pip libraries
+  pip: name={{item}}
+  with_items:
+    - requests
+    - paramiko
