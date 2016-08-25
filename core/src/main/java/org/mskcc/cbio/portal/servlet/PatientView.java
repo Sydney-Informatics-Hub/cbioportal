@@ -485,34 +485,11 @@ public class PatientView extends HttpServlet {
             request.setAttribute(TISSUE_IMAGES, tisImageUrl);
         }
         
-        setCA125ReportURL(cancerStudy, patientId, request);
+        setCA125PlotURL(cancerStudy, patientId, request);
         
         // path report
         if (GlobalProperties.useInternalPathReports()) {
-            // Expected url path 'studyId/patientId/sampleId.pdf' maps to expected filesystem path 'studyId.patientId.sampleId.pdf'
-            final String reportBaseURL = "pathology_report/" + cancerStudy.getCancerStudyStableId() 
-                + "/" + patientId + "/";
-            final String reportBasePath = GlobalProperties.getInternalPathReportRoot() + "/" 
-                + cancerStudy.getCancerStudyStableId() + "." + patientId + ".";
-            if (isPatientView) {
-                Map<String,String> sampleReportUrls = new HashMap<String,String>();
-                for (String sample : samples) {
-                    final String reportFileName = sample + ".pdf";
-                    if (new File(reportBasePath + reportFileName).exists()) {
-                        sampleReportUrls.put(sample, reportBaseURL + reportFileName);
-                    }
-                }
-                if (!sampleReportUrls.isEmpty()) {
-                    //ToDo: send across the map of all sample URLs and handle the map within the patient_view.jsp and the path_report.jsp
-                    final String firstSampleReport = sampleReportUrls.entrySet().iterator().next().getValue();
-                    request.setAttribute(PATH_REPORT_URL, firstSampleReport);
-                }
-            } else {
-                final String reportFileName = sampleId + ".pdf";
-                if (new File(reportBasePath + reportFileName).exists()) {
-                    request.setAttribute(PATH_REPORT_URL, reportBaseURL + reportFileName);
-                }
-            }
+            setInternalPathologyReportUrl(cancerStudy, patientId, samples, isPatientView, request);
         } else {
             String typeOfCancer = cancerStudy.getTypeOfCancerId();
             if (patientId!=null && patientId.startsWith("TCGA-")) {
@@ -524,10 +501,32 @@ public class PatientView extends HttpServlet {
         }
     }
     
-    private void setCA125ReportURL(CancerStudy cancerStudy, String patientId, HttpServletRequest request) {
-        final String ca125URL = "ca125_plot/" + cancerStudy.getCancerStudyStableId() + "/" + patientId + "/CA125.pdf";
+    private void setInternalPathologyReportUrl(CancerStudy cancerStudy, String patientId, List<String> sampleIds, 
+                                               boolean isPatientView, HttpServletRequest request) {
+        final String reportRootDir = GlobalProperties.getInternalPathReportRoot();
+        String reportFileName = null;
+        if (isPatientView) {
+            java.util.Collections.sort(sampleIds); // sort sampleIds alphabetically
+            for (String sample : sampleIds) {
+                final String sampleReportName = cancerStudy.getCancerStudyStableId() + "." + patientId + "." 
+                    + sample + ".pdf";
+                if (new File(reportRootDir + sampleReportName).exists()) {
+                    reportFileName = sampleReportName;
+                    break;
+                }
+            }            
+        } else {
+            reportFileName = cancerStudy.getCancerStudyStableId() + "." + patientId + "." + sampleIds.get(0) + ".pdf";
+        }        
+        if (reportFileName != null && new File(reportRootDir + reportFileName).exists()) {
+            request.setAttribute(PATH_REPORT_URL, "pathology_report/" + reportFileName);
+        }
+    }
+    
+    private void setCA125PlotURL(CancerStudy cancerStudy, String patientId, HttpServletRequest request) {
         final String ca125RootDir = GlobalProperties.getInternalCa125PlotRoot();
         final String ca125FileName = cancerStudy.getCancerStudyStableId() + '.' + patientId + ".CA125.pdf";
+        final String ca125URL = "ca125_plot/" + ca125FileName;
         final File ca125File = new File(ca125RootDir, ca125FileName);
         if (ca125File.exists()) {
             request.setAttribute(CA125_PLOT_URL, ca125URL);

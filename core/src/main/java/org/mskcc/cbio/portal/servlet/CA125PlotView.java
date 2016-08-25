@@ -32,6 +32,7 @@
 
 package org.mskcc.cbio.portal.servlet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoPatient;
@@ -44,6 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * A servlet to respond to requests for CA125 Plot files for cancer studies.
@@ -64,10 +66,10 @@ public class CA125PlotView extends PdfFileView {
 
     boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
         final String requestedPath = getRequestedPath(request);
-        final String[] path = requestedPath.split("/");
-        if (path.length != 3) {
+        final String[] path = FilenameUtils.removeExtension(requestedPath).split(Pattern.quote("."));
+        if (path.length != 3 || !(path[2].equals("CA125"))) {
             setError(request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to process requested CA125 plot " +
-                "path. Ensure it is in the format cbioportal/ca125_plot/study_id/patient_id/CA125.pdf");
+                "path. Ensure it is in the format cbioportal/ca125_plot/study_id.patient_id.CA125.pdf");
             return false;
         }
 

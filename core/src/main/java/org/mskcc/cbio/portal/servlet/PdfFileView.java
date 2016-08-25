@@ -56,7 +56,7 @@ public abstract class PdfFileView  extends HttpServlet {
     private static final String ERROR_CODE = "error_code";
     private static final String ERROR_MSG = "error_msg";
     protected AccessControl accessControl; // class which process access control to cancer studies
-    String DATA_DIRECTORY;
+    String DATA_DIRECTORY = null; // Data directory needs to be set in concrete extending classes
 
     /**
      * Initializes the servlet.
@@ -98,8 +98,7 @@ public abstract class PdfFileView  extends HttpServlet {
     }
 
     File getRequestedFile(HttpServletRequest request) throws IOException {
-        final String convertedPath = getRequestedPath(request).replace("/", ".");
-        return new File(DATA_DIRECTORY, convertedPath);
+        return new File(DATA_DIRECTORY, getRequestedPath(request));
     }
 
     void setError(HttpServletRequest request, int httpStatusCode, String errorMessage) {
@@ -110,7 +109,7 @@ public abstract class PdfFileView  extends HttpServlet {
     abstract boolean validRequest(HttpServletRequest request) throws IOException, DaoException;
 
     private void serveFile(HttpServletResponse response, File file) throws IOException{
-        logger.info("CA125PlotView.serveFile(): Serving file: " + file.getPath());
+        logger.info("PdfFileView.serveFile(): Serving file: " + file.getPath());
         response.setHeader("Content-Type", getServletContext().getMimeType(file.getName()));
         response.setHeader("Content-Length", String.valueOf(file.length()));
         response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");

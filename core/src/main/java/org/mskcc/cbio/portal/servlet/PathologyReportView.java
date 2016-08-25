@@ -32,6 +32,7 @@
 
 package org.mskcc.cbio.portal.servlet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoPatient;
@@ -46,7 +47,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.File;
-import org.apache.commons.io.FilenameUtils;
+import java.util.regex.Pattern;
 
 /**
  * A servlet to respond to requests for Pathology Report files for cancer studies.
@@ -66,13 +67,13 @@ public class PathologyReportView extends PdfFileView {
         super.init();
         DATA_DIRECTORY = GlobalProperties.getInternalPathReportRoot();
     }
-    
+
     boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
         final String requestedPath = getRequestedPath(request);
-        final String[] path = requestedPath.split("/");
+        final String[] path = FilenameUtils.removeExtension(requestedPath).split(Pattern.quote("."));
         if (path.length != 3) {
             setError(request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to process requested pathology " +
-                "report path. Ensure it is in the format cbioportal/pathology_report/study_id/patient_id/sample_id.pdf");
+                "report path. Ensure it is in the format cbioportal/pathology_report/study_id.patient_id.sample_id.pdf");
             return false;
         }
 
@@ -96,7 +97,7 @@ public class PathologyReportView extends PdfFileView {
             return false;
         }
         
-        final String sampleId = FilenameUtils.removeExtension(path[2]);
+        final String sampleId = path[2];
         Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getInternalId(), sampleId, false);
         if (sample == null) {
             setError(request, HttpServletResponse.SC_NOT_FOUND, "No such sample with id '" + sampleId + "' " +
