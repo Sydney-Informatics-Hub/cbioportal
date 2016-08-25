@@ -32,44 +32,24 @@
 
 package org.mskcc.cbio.portal.servlet;
 
-import org.apache.log4j.Logger;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoPatient;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.Patient;
-import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
-import org.mskcc.cbio.portal.util.SpringUtil;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.File;
-import java.nio.file.Files;
-import java.net.URLDecoder;
+import java.io.IOException;
 
 /**
  * A servlet to respond to requests for CA125 Plot files for cancer studies.
  * Adapted from CancerStudyView.java
- * 
  */
-public class CA125PlotView extends HttpServlet {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private static Logger logger = Logger.getLogger(CA125PlotView.class);
-    private static final String ERROR_CODE = "error_code";
-    private static final String ERROR_MSG = "error_msg";
-
-    // class which process access control to cancer studies
-    private AccessControl accessControl;
-
-    // root directory of internal CA125 plots or null if undefined
-    private static final String DATA_DIRECTORY = GlobalProperties.getInternalCa125PlotRoot();
+public class CA125PlotView extends PdfFileView {
     
     /**
      * Initializes the servlet.
@@ -79,49 +59,10 @@ public class CA125PlotView extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-		accessControl = SpringUtil.getAccessControl();
+        DATA_DIRECTORY = GlobalProperties.getInternalCa125PlotRoot();
     }
-    
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {        
-        try {            
-            if (validRequest(request)) {
-                File ca125Report = getRequestedFile(request);
-                serveFile(response, ca125Report);
-            } else {
-                response.sendError(Integer.parseInt((String) request.getAttribute(ERROR_CODE)),
-                    (String) request.getAttribute(ERROR_MSG));
-            }
-        } catch (DaoException e) {
-            logger.error("Got Database Exception while processing request for CA125 plot.", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-                "An error occurred while trying to connect to the database.");
-        }
-    }
-    
-    private String getRequestedPath(HttpServletRequest request) throws IOException{
-        return URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
-    }
-    
-    private File getRequestedFile(HttpServletRequest request) throws IOException {
-        // Convert from the expected url path 'studyId/patientId/CA125.pdf' to the expected filesystem path 'studyId.patientId.CA125.pdf'
-        final String convertedPath = getRequestedPath(request).replace("/", ".");;
-        return new File(DATA_DIRECTORY, convertedPath);
-    }
-    
-    private void setError(HttpServletRequest request, int httpStatusCode, String errorMessage) {
-        request.setAttribute(ERROR_CODE, Integer.toString(httpStatusCode));
-        request.setAttribute(ERROR_MSG, errorMessage);
-    }
-    
-    private boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
+
+    boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
         final String requestedPath = getRequestedPath(request);
         final String[] path = requestedPath.split("/");
         if (path.length != 3) {
@@ -137,11 +78,11 @@ public class CA125PlotView extends HttpServlet {
             return false;
         }
         if (accessControl.isAccessibleCancerStudy(cancerStudyId).size() != 1) {
-            setError(request, HttpServletResponse.SC_FORBIDDEN, 
+            setError(request, HttpServletResponse.SC_FORBIDDEN,
                 "You are not authorized to access the cancer study with id '" + cancerStudyId + "'.");
             return false;
         }
-        
+
         final String patientId = path[1];
         Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), patientId);
         if (patient == null) {
@@ -149,62 +90,18 @@ public class CA125PlotView extends HttpServlet {
                 "within the cancer study with id '" + cancerStudyId + "'");
             return false;
         }
-                
+
         if (DATA_DIRECTORY == null) {
             setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of CA125 plots is undefined");
             return false;
         }
         File requestedFile = getRequestedFile(request);
         if (!requestedFile.exists() || requestedFile.isDirectory()) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate CA125 plot '" 
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate CA125 plot '"
                 + requestedFile.getName() + "' " + "for the cancer study with id '" + cancerStudyId + "'.");
             return false;
         }
-        
+
         return true;
     }
-    
-    private void serveFile(HttpServletResponse response, File file) throws IOException{
-        logger.info("CA125PlotView.serveFile(): Serving file: " + file.getPath());
-        response.setHeader("Content-Type", getServletContext().getMimeType(file.getName()));
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
-        Files.copy(file.toPath(), response.getOutputStream());
-    }
-    
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
-     * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /** 
-     * Returns a short description of the servlet.
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
 }

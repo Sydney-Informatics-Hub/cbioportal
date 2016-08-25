@@ -32,7 +32,6 @@
 
 package org.mskcc.cbio.portal.servlet;
 
-import org.apache.log4j.Logger;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoPatient;
@@ -40,18 +39,13 @@ import org.mskcc.cbio.portal.dao.DaoSample;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.Patient;
 import org.mskcc.cbio.portal.model.Sample;
-import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
-import org.mskcc.cbio.portal.util.SpringUtil;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.File;
-import java.nio.file.Files;
-import java.net.URLDecoder;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -60,68 +54,20 @@ import org.apache.commons.io.FilenameUtils;
  * 
  * @author Shaun Muscat
  */
-public class PathologyReportView extends HttpServlet {
-    private static Logger logger = Logger.getLogger(PathologyReportView.class);
-    private static final String ERROR_CODE = "error_code";
-    private static final String ERROR_MSG = "error_msg";
-
-    // class which process access control to cancer studies
-    private AccessControl accessControl;
-
-    // root directory of internal pathology reports or null if undefined
-    private static final String DATA_DIRECTORY = GlobalProperties.getInternalPathReportRoot();
+public class PathologyReportView extends PdfFileView {
     
     /**
      * Initializes the servlet.
      *
-     * @throws ServletException Serlvet Init Error.
+     * @throws ServletException Servlet Init Error.
      */
     @Override
     public void init() throws ServletException {
         super.init();
-		accessControl = SpringUtil.getAccessControl();
+        DATA_DIRECTORY = GlobalProperties.getInternalPathReportRoot();
     }
     
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {        
-        try {            
-            if (validRequest(request)) {
-                File pathologyReport = getRequestedFile(request);
-                serveFile(response, pathologyReport);
-            } else {
-                response.sendError(Integer.parseInt((String) request.getAttribute(ERROR_CODE)),
-                    (String) request.getAttribute(ERROR_MSG));
-            }
-        } catch (DaoException e) {
-            logger.error("Got Database Exception while processing request for pathology report.", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-                "An error occurred while trying to connect to the database.");
-        }
-    }
-    
-    private String getRequestedPath(HttpServletRequest request) throws IOException{
-        return URLDecoder.decode(request.getPathInfo().substring(1), "UTF-8");
-    }
-    
-    private File getRequestedFile(HttpServletRequest request) throws IOException {
-        // Convert from the expected url path 'studyId/patientId/sampleId.pdf' to the expected filesystem path 'studyId.patientId.sampleId.pdf'
-        final String convertedPath = getRequestedPath(request).replace("/", ".");
-        return new File(DATA_DIRECTORY, convertedPath);
-    }
-    
-    private void setError(HttpServletRequest request, int httpStatusCode, String errorMessage) {
-        request.setAttribute(ERROR_CODE, Integer.toString(httpStatusCode));
-        request.setAttribute(ERROR_MSG, errorMessage);
-    }
-    
-    private boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
+    boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
         final String requestedPath = getRequestedPath(request);
         final String[] path = requestedPath.split("/");
         if (path.length != 3) {
@@ -171,48 +117,4 @@ public class PathologyReportView extends HttpServlet {
         
         return true;
     }
-    
-    private void serveFile(HttpServletResponse response, File file) throws IOException{
-        logger.info("PathologyReportView.serveFile(): Serving file: " + file.getPath());
-        response.setHeader("Content-Type", getServletContext().getMimeType(file.getName()));
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");
-        Files.copy(file.toPath(), response.getOutputStream());
-    }
-    
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
-     * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /** 
-     * Returns a short description of the servlet.
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
 }
