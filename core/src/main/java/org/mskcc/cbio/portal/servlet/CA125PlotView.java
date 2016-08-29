@@ -36,26 +36,22 @@ import org.apache.commons.io.FilenameUtils;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.DaoPatient;
-import org.mskcc.cbio.portal.dao.DaoSample;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.Patient;
-import org.mskcc.cbio.portal.model.Sample;
 import org.mskcc.cbio.portal.util.GlobalProperties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
- * A servlet to respond to requests for Pathology Report files for cancer studies.
+ * A servlet to respond to requests for CA125 Plot files for cancer studies.
  * Adapted from CancerStudyView.java
- * 
- * @author Shaun Muscat
  */
-public class PathologyReportView extends PdfFileView {
+public class CA125PlotView extends PdfFileView {
     
     /**
      * Initializes the servlet.
@@ -65,15 +61,15 @@ public class PathologyReportView extends PdfFileView {
     @Override
     public void init() throws ServletException {
         super.init();
-        DATA_DIRECTORY = GlobalProperties.getInternalPathReportRoot();
+        DATA_DIRECTORY = GlobalProperties.getInternalCa125PlotRoot();
     }
 
     boolean validRequest(HttpServletRequest request) throws IOException, DaoException {
         final String requestedPath = getRequestedPath(request);
         final String[] path = FilenameUtils.removeExtension(requestedPath).split(Pattern.quote("."));
-        if (path.length != 3) {
-            setError(request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to process requested pathology " +
-                "report path. Ensure it is in the format cbioportal/pathology_report/study_id.patient_id.sample_id.pdf");
+        if (path.length != 3 || !(path[2].equals("CA125"))) {
+            setError(request, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to process requested CA125 plot " +
+                "path. Ensure it is in the format cbioportal/ca125_plot/study_id.patient_id.CA125.pdf");
             return false;
         }
 
@@ -84,11 +80,11 @@ public class PathologyReportView extends PdfFileView {
             return false;
         }
         if (accessControl.isAccessibleCancerStudy(cancerStudyId).size() != 1) {
-            setError(request, HttpServletResponse.SC_FORBIDDEN, 
+            setError(request, HttpServletResponse.SC_FORBIDDEN,
                 "You are not authorized to access the cancer study with id '" + cancerStudyId + "'.");
             return false;
         }
-        
+
         final String patientId = path[1];
         Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(cancerStudy.getInternalId(), patientId);
         if (patient == null) {
@@ -96,26 +92,18 @@ public class PathologyReportView extends PdfFileView {
                 "within the cancer study with id '" + cancerStudyId + "'");
             return false;
         }
-        
-        final String sampleId = path[2];
-        Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(cancerStudy.getInternalId(), sampleId, false);
-        if (sample == null) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "No such sample with id '" + sampleId + "' " +
-                "within the cancer study with id '" + cancerStudyId + "'");
-            return false;
-        }
-        
+
         if (DATA_DIRECTORY == null) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of pathology reports is undefined");
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "The internal location of CA125 plots is undefined");
             return false;
         }
         File requestedFile = getRequestedFile(request);
         if (!requestedFile.exists() || requestedFile.isDirectory()) {
-            setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate pathology report '" 
+            setError(request, HttpServletResponse.SC_NOT_FOUND, "Unable to locate CA125 plot '"
                 + requestedFile.getName() + "' " + "for the cancer study with id '" + cancerStudyId + "'.");
             return false;
         }
-        
+
         return true;
     }
 }

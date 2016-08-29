@@ -51,9 +51,13 @@ Rapid connect environment used to issue the service, "https://rapid.aaf.edu.au" 
 Secret value shared between the service and Rapid Connect, as part of registration, for token encryption and verification. 
 Note: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\\), otherwise the backslash will be silently dropped when the property is loaded within cBioPortal.
 
-    internal_path_report_root:
+    internal_path_report_root
 
-Root directory of where the internal pathology reports are stored, for example "/data/pathology_reports"
+Root directory of where the internal pathology reports are stored, for example "/home/devel/data/pathology_reports"
+
+    internal_ca125_plot_root
+
+Root directory of where the internal CA125 plots are stored, for example "/home/devel/data/ca125_plots"
 
 ## Role Tags
 

@@ -120,7 +120,7 @@
                   <p/>
 
                 <% } else if (authenticationMethod.equals("ad") || authenticationMethod.equals("ldap")) { %>
-                  <form name='loginForm' action="<c:url value='j_spring_security_check' />" method='POST'>
+                  <form name='loginForm' action="<c:url value='j_spring_security_check' />" method='post'>
                 <% } %>
 
                 <fieldset id="login-fieldset">

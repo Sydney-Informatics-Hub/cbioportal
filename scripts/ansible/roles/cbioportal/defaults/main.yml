@@ -20,5 +20,7 @@ service_issuer:
 # Note: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\\), otherwise the backslash will be silently dropped when the property is loaded within cBioPortal
 service_shared_secret:
 
-# Root directory to internal pathology reports, for example "/data/pathology_reports"
+# Root directory to internal pathology reports, for example "/home/devel/data/pathology_reports"
 internal_path_report_root:
+# Root directory to internal CA125 plots, for example "/home/devel/data/ca125_plots"
+internal_ca125_plot_root:
