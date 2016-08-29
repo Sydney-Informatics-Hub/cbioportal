@@ -128,7 +128,7 @@
                       Login to Portal:
                   </legend>
                   <p>
-                    <span style="color:#666666;font-family:verdana,arial,sans-serif;font-size:145%">
+                    <span style="color:#666666;font-family:verdana,arial,sans-serif;font-size:145%;white-space:pre-line">
                       <%= GlobalProperties.getAuthorizationMessage() %>
                     </span>
                   </p>
