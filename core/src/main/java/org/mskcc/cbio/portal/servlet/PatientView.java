@@ -508,17 +508,19 @@ public class PatientView extends HttpServlet {
         if (isPatientView) {
             java.util.Collections.sort(sampleIds); // sort sampleIds alphabetically
             for (String sample : sampleIds) {
+                logger.debug("Checking for internal pathology report for sample: " + sample);
                 final String sampleReportName = cancerStudy.getCancerStudyStableId() + "." + patientId + "." 
                     + sample + ".pdf";
-                if (new File(reportRootDir + sampleReportName).exists()) {
+                if (new File(reportRootDir, sampleReportName).exists()) {
+                    logger.debug("Internal pathology report found");
                     reportFileName = sampleReportName;
                     break;
                 }
             }            
         } else {
             reportFileName = cancerStudy.getCancerStudyStableId() + "." + patientId + "." + sampleIds.get(0) + ".pdf";
-        }        
-        if (reportFileName != null && new File(reportRootDir + reportFileName).exists()) {
+        }
+        if (reportFileName != null && new File(reportRootDir, reportFileName).exists()) {
             request.setAttribute(PATH_REPORT_URL, "pathology_report/" + reportFileName);
         }
     }
