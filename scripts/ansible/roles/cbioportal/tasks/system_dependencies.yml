@@ -7,6 +7,7 @@
     - git
     - unzip
     - gzip
+    - gcc
     - iptables-services
     - python-pip 
     - python-devel
