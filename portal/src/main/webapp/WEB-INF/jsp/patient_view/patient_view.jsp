@@ -397,8 +397,12 @@ if (patientViewError!=null) {
     }
 </style>
 
+<link rel="stylesheet" type="text/css" href="css/oncokb.css" />
+
 <script type="text/javascript" src="js/src/patient-view/genomic-event-observer.js?<%=GlobalProperties.getAppVersion()%>"></script>
-<script type="text/javascript" src="js/src/OncoKBConnector.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<%@ include file="../oncokb/oncokb-card-template.html" %>
+<script type="text/javascript" src="js/src/oncokb/OncoKBCard.js?<%=GlobalProperties.getAppVersion()%>"></script>
+<script type="text/javascript" src="js/src/oncokb/OncoKBConnector.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script src="js/lib/dataTables.tableTools.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript">
 
@@ -487,6 +491,62 @@ function fixCytoscapeWebRedraw() {
             $("#tab_pathways").attr('style', 'display: block !important; height: 0px; width: 0px; visibility: hidden;');
         }
     });
+}
+
+
+function initOncoKB(instanceId, ids, mapData, type, indicatorCallback) {
+    var instance;
+    
+    if(OncoKB.getAccess() && _.isArray(ids)) {
+        var eventIdsLength = ids.length;
+
+        var oncokbInstanceManager = new OncoKB.addInstanceManager();
+        instance = oncokbInstanceManager.addInstance(instanceId);
+        if(oncokbGeneStatus) {
+            instance.setGeneStatus(oncokbGeneStatus);
+        }
+        instance.setTumorType(OncoKB.utils.getTumorTypeFromClinicalDataMap(clinicalDataMap));
+
+
+        for (var i=0, nEvents= eventIdsLength; i<nEvents; i++) {
+            var _id = ids[i];
+            if(instance) {
+                if(type === 'mutation') {
+                    instance.addVariant(_id, mapData.getValue(_id, "entrez"), mapData.getValue(_id, "gene"),
+                        mapData.getValue(_id, "aa"),
+                        (_.isObject(patientInfo) ? (patientInfo.CANCER_TYPE_DETAILED || patientInfo.CANCER_TYPE) : '') || cancerType,
+                        mapData.getValue(_id, "type") ? mapData.getValue(_id, "type") : 'any',
+                        findCosmic(mapData.getValue(_id, "cosmic"), mapData.getValue(_id, "aa")),
+                        mapData.getValue(_id, "is-hotspot"), mapData.getValue(_id, 'protein-start'),
+                        mapData.getValue(_id, 'protein-end'));
+                }else if(type === 'cna') {
+                    var alter = '';
+                    switch(mapData.getValue(_id, "alter")) {
+                        case 2:
+                            alter = 'amplification';
+                            break;
+                        case -2:
+                            alter = 'deletion';
+                            break;
+                        default:
+                            alter = null;
+                    }
+                    instance.addVariant(_id, mapData.getValue(_id, "entrez"), mapData.getValue(_id, "gene"), alter,
+                        (_.isObject(patientInfo) ? (patientInfo.CANCER_TYPE_DETAILED || patientInfo.CANCER_TYPE) : '') || cancerType,
+                        alter);
+                }
+            }
+        }
+
+        if(instance) {
+            instance.getIndicator().then(function () {
+                if(_.isFunction(indicatorCallback)) {
+                    indicatorCallback(instance);
+                }
+            });
+        }
+    }
+    return instance;
 }
 
 function switchToTab(toTab) {
