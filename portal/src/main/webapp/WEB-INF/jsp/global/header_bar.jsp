@@ -60,7 +60,7 @@
 			<img src="<c:url value="${tagLineImage}"/>" alt="Tag Line" style="max-height: 50px;">
 		</td>
         <td valign="middle" align="right" width="25%">
-            <img src="<c:url value="${rightLogo}"/>" alt="Institute Logo" style="max-height: 50px;">
+            <img src="<c:url value="${rightLogo}"/>" alt="Institute Logo" style="max-height: 75px;">
         </td>
 	</tr>
     <!-- Display Sign Out Button for Real (Non-Anonymous) User -->
