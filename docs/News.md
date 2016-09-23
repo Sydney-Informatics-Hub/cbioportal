@@ -264,7 +264,7 @@
 # October 21, 2013
 
 *   Improved interface for survival plots, including information on individual samples via mouse-over
-*   New fusion glyph in OncoPrints    [![FGFR3 fusions in head and neck carcinoma](images/previews/fusion-in-oncoprint.png)](http://www.cbioportal.org/index.do?cancer_study_id=hnsc_tcga_pub&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=hnsc_tcga_pub_mutations&genetic_profile_ids_PROFILE_COPY_NUMBER_ALTERATION=hnsc_tcga_pub_gistic&Z_SCORE_THRESHOLD=2.0&RPPA_SCORE_THRESHOLD=2.0&data_priority=0&case_set_id=hnsc_tcga_pub_sequenced&case_ids=&gene_set_choice=user-defined-list&gene_list=FGFR3%3A+AMP+MUT%3B%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A&clinical_param_selection=null&tab_index=tab_visualize&Action=Submit)
+*   New fusion glyph in OncoPrints    [![FGFR3 fusions in head and neck carcinoma](images/previews/fusion-in-oncoprint.png)](http://www.cbioportal.org/index.do?cancer_study_id=hnsc_tcga_pub&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=hnsc_tcga_pub_mutations&genetic_profile_ids_PROFILE_COPY_NUMBER_ALTERATION=hnsc_tcga_pub_gistic&Z_SCORE_THRESHOLD=2.0&RPPA_SCORE_THRESHOLD=2.0&data_priority=0&case_set_id=hnsc_tcga_pub_sequenced&case_ids=&gene_set_choice=user-defined-list&gene_list=FGFR3%3A+AMP+MUT%3B%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A&clinical_param_selection=null&tab_index=tab_visualize&Action=Submit)
 *   Improved cross-cancer query: new alteration frequency histogram (example below - query gene: CDKN2A) and mutation diagram
 
     <center>![Cross Cancer Query](images/previews/cross_cancer.png)</center>
