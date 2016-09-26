@@ -90,7 +90,14 @@
             <intercept-url pattern="/favicon.ico" access="permitAll"/>
             <intercept-url pattern="/login.jsp*" access="permitAll"/>
             <intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
-            <intercept-url pattern="/api/**/*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
+            <!-- ToDo: Investigate why requests from any browser or machine are identified as 
+                        'RemoteIpAddress: 127.0.0.1' when intercepted by spring security -->
+            <!--<intercept-url pattern="/api/**/*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>-->
+            <intercept-url pattern="/api/cancertypes" access="permitAll"/>
+            <intercept-url pattern="/api/genes" access="permitAll"/>
+            <intercept-url pattern="/api/genesaliases" access="permitAll"/>
+            <intercept-url pattern="/api/clinicalattributes/patients" access="permitAll"/>
+            <intercept-url pattern="/api/clinicalattributes/samples" access="permitAll"/>
             <intercept-url pattern="/**" access="isAuthenticated()"/>
 
             <custom-filter ref="aafAuthenticationFilter" before="PRE_AUTH_FILTER" />
