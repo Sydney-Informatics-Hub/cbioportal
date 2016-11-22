@@ -93,6 +93,7 @@
             <!-- ToDo: Investigate why requests from any browser or machine are identified as 
                         'RemoteIpAddress: 127.0.0.1' when intercepted by spring security -->
             <!--<intercept-url pattern="/api/**/*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>-->
+            <intercept-url pattern="/admin" access="hasRole('ROLE_ADMIN')"/>
             <intercept-url pattern="/api/cancertypes" access="permitAll"/>
             <intercept-url pattern="/api/genes" access="permitAll"/>
             <intercept-url pattern="/api/genesaliases" access="permitAll"/>

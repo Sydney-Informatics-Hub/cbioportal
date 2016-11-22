@@ -152,6 +152,12 @@
 					                            <a href="visualize_your_data.jsp" float="left">VISUALIZE YOUR DATA</a>
 					                        </li>
                                             <% } %>
+                                            
+                                            <sec:authorize access="hasRole('ROLE_ADMIN')">
+	                                            <li class="internal" style="float:left">
+						                            <a href="admin" float="left">ADMIN</a>
+						                        </li>
+                                            </sec:authorize>
 
                                             <!--li class="internal" style="float:right">
 					    <a href="jobs.jsp" float="right"><b><i>JOBS</i></b></a>
