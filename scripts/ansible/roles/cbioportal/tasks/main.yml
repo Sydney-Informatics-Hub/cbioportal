@@ -18,7 +18,7 @@
 
 - name: Pull source code from git
   git: >
-    repo=https://github.com/IntersectAustralia/cbioportal.git
+    repo=https://{{ bitbucket_user }}@bitbucket.com/ctds/cbioportal.git
     dest={{ cbioportal_root }}
     version={{ cbioportal_git_tag }}
     force=yes
