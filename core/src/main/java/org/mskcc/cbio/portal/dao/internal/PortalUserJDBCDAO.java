@@ -138,6 +138,15 @@ public class PortalUserJDBCDAO implements PortalUserDAO {
 		namedParameters.put("enabled", user.isEnabled() ? new Integer(1) : new Integer(0));
 		namedParameterJdbcTemplate.update(sql, namedParameters);
 	}
+	public void updatePortalUser(User user)
+	{
+		String sql = "update users set name=:name, enabled=:enabled where email=:email";
+		Map namedParameters = new HashMap();
+		namedParameters.put("email", user.getEmail());
+		namedParameters.put("name", user.getName());
+		namedParameters.put("enabled", user.isEnabled() ? new Integer(1) : new Integer(0));
+		namedParameterJdbcTemplate.update(sql, namedParameters);
+	}
 
 	public void addPortalUserAuthorities(UserAuthorities userAuthorities)
 	{
@@ -148,6 +157,46 @@ public class PortalUserJDBCDAO implements PortalUserDAO {
 			namedParameters.put("authority", authority);
 			namedParameterJdbcTemplate.update(sql, namedParameters);
 		}
+	}
+	
+	public void deletePortalUser(User user) {
+		String sqlUsers = "delete from users where email=:email";
+		String sqlAuthorities = "delete from authorities where email=:email";
+		Map<String, Object> namedParameters = new HashMap<>();
+		namedParameters.put("email", user.getEmail());
+		namedParameterJdbcTemplate.update(sqlAuthorities, namedParameters);
+		namedParameterJdbcTemplate.update(sqlUsers, namedParameters);
+	}
+	
+	public void deletePortalUserAuthorities(UserAuthorities userAuthorities) {
+		String sql = "delete from authorities where email=:email and authority=:authority";
+		for (String authority : userAuthorities.getAuthorities()) {
+			Map<String, Object> namedParameters = new HashMap<>();
+			namedParameters.put("email", userAuthorities.getEmail());
+			namedParameters.put("authority", authority);
+			namedParameterJdbcTemplate.update(sql, namedParameters);
+		}
+	}
+	
+	public List<User> getAllUsers() {
+		String sql = "select email, name, enabled from users";
+		ParameterizedRowMapper<User> mapper = new ParameterizedRowMapper<User>() {
+			public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return new User(rs.getString("email"),
+                                rs.getString("name"),
+                                rs.getBoolean("enabled"));
+			}
+		};
+		return this.namedParameterJdbcTemplate.query(sql, mapper);
+	}
+	public List<UserAuthorities> getAllUserAuthorities() {
+		String sql = "select distinct email from authorities";
+		ParameterizedRowMapper<UserAuthorities> mapper = new ParameterizedRowMapper<UserAuthorities>() {
+			public UserAuthorities mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return getPortalUserAuthorities(rs.getString("email"));
+			}
+		};
+		return this.namedParameterJdbcTemplate.query(sql, mapper);
 	}
 
 }

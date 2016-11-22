@@ -578,4 +578,12 @@
         <url-pattern>/ln</url-pattern>
     </servlet-mapping>
 
+	<servlet>
+        <servlet-name>admin_modify</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.ModifyAdmin</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>admin_modify</servlet-name>
+        <url-pattern>/admin/*</url-pattern>
+    </servlet-mapping>
 </web-app>
