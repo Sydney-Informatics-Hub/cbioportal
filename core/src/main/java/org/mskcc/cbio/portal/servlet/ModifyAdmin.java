@@ -17,6 +17,7 @@ import org.mskcc.cbio.portal.model.User;
 import org.mskcc.cbio.portal.model.UserAuthorities;
 import org.mskcc.cbio.portal.util.GlobalProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -179,23 +180,28 @@ public class ModifyAdmin extends HttpServlet {
 	private void newUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String email = request.getParameter("email");
 		if(StringUtils.isEmpty(email)) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Please enter an email address.");
+			error(response, "Please enter an email address.");
 			return;
 		}
 		String name = request.getParameter("name");
 		if(StringUtils.isEmpty(name)) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Please enter a name.");
+			error(response, "Please enter a name.");
 			return;
 		}
 		boolean enabled = !StringUtils.isEmpty(request.getParameter("enabled"));
-		userDAO.addPortalUser(new User(email, name, enabled));
+		try {
+			userDAO.addPortalUser(new User(email, name, enabled));
+		} catch(DataAccessException e) {
+			error(response, "User with that email already exists.");
+			return;
+		}
 		JSONObject user = new JSONObject();
 		user.put("email", email);
 		user.put("name", name);
 		user.put("enabled", enabled ? "Yes" : "No");
 		user.writeJSONString(response.getWriter());
 	}
-	
+
 	/**
      * Create a new user authority with user email address specified by the <code>email</code> parameter. 
      * If the <code>admin</code> parameter is present, the authority will be to add the user as an
@@ -242,5 +248,17 @@ public class ModifyAdmin extends HttpServlet {
 		result.put("email", username);
 		result.put("authority", AdminView.translateAuthority(authority));
 		result.writeJSONString(response.getWriter());
+	}
+	
+	/**
+	 * Send an error with a plain-text message back and HTTP status 500.
+	 * 
+	 * @param response servlet response
+	 * @param message the error message to send back
+	 * @throws IOException if an I/O error occurs
+	 */
+	private void error(HttpServletResponse response, String message) throws IOException {
+		response.setStatus(400);
+		response.getWriter().write(message);
 	}
 }
