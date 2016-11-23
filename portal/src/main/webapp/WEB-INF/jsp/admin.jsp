@@ -62,6 +62,34 @@
 				</c:forEach>
 			</tbody>
 		</table>
+		
+		<div class='form'>
+			<button type='button' class='add-user'>Add User</button>
+			<div id='addUser'>
+				<div class='error' style='display:none'></div>
+				<form>
+					<div class='form-group'>
+						<label for='addUserEmail'>Email:</label>
+						<input type='text' name='email' id='addUserEmail' class='form-control' />
+					</div>
+					<div class='form-group'>
+						<label for='addUserName'>Name:</label>
+						<input type='text' name='name' id='addUserName' class='form-control' />
+					</div>
+					<div class='form-group'>
+						<div class='form-check'>
+							<label class='form-check-label'>
+								<input type='checkbox' name='enabled' checked='checked' class='form-check-input' /> 
+								Enabled
+							</label>
+						</div>
+					</div>
+					<div class='form-group'>
+						<button type='submit' class='btn btn-primary'>Save</button>
+					</div>
+				</form>
+			</div>
+		</div>
 	</div>
 	
 	<div class="admin-section" id="authorities">
@@ -150,6 +178,39 @@
 		)
 	});
 	
+	$("#addUser").hide();
+	$("button.add-user").on("click", function() {
+		$(this).hide();
+		$("#addUser").show();
+	});
+	
+	$("#addUser form").on("submit", function() {
+		$("#addUser .error").hide();
+		doAction("newUser",
+			$(this).serialize(),
+			function(user) {
+				var actionCell = $("#userTable tr:last td:last").clone();
+				actionCell.find(".toggle-user").text((user.enabled == "Yes" ? "Disable" : "Enable") + " User");
+				var newRow = $("<tr/>")
+					.append($("<td/>", {class: "email", text: user.email}))
+					.append($("<td/>", {text: user.name}))
+					.append($("<td/>", {class: "enabled", text: user.enabled}))
+					.append(actionCell);
+				$("#userTable").DataTable().row.add(newRow).draw();
+			},
+			function(obj, status, text) {
+				if(obj.status && obj.status == 400) {
+					$("#addUser .error").html(obj.responseText);
+				} else {
+					$("#addUser .error").html("An unknown error occurred.");
+				}
+				$("#addUser .error").show();
+				console.log(obj, status, text);
+			}
+		);
+		return false;
+	});
+	
 	function doAction(action, params, success, error) {
 		if(typeof error !== 'function') {
 			error = function(obj, status, text) {
@@ -201,6 +262,15 @@
             font-weight: bold;
             font-size: 120%;
             vertical-align: middle;
+    }
+    div.form {
+    	margin-top: 1em;
+    }
+    form * {
+    	box-sizing: border-box;
+    }
+    label {
+    	font-weight: normal;
     }
 </style>
 
