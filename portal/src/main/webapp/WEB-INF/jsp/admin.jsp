@@ -73,8 +73,8 @@
 				<c:forEach var="userAuthority" items="${allUserAuthorities}">
 					<c:forEach var="authority" items="${userAuthority.authorities}">
 						<tr>
-							<td>${userAuthority.email}</td>
-							<td>${authority}</td>
+							<td class='email'>${userAuthority.email}</td>
+							<td class='authority' data-auth='${authority}'>${authMap[authority]}</td>
 							<td><button type='button' class='delete-authority'>Remove Authority</button></td>
 						</tr>
 					</c:forEach>
@@ -112,8 +112,10 @@
 		doAction("deleteUser", 
 			{user: user}, 
 			function(response){
-				row.remove();
-				$("#authorities tr:contains(" + user + ")").remove();
+				row.effect("highlight", {color: '#FCC'}, function() {
+					$("#userTable").DataTable().row(row).remove().draw();
+					$("#authoritiesTable").DataTable().rows("tr:contains(" + user + ")").remove().draw();
+				});
 			}
 		);
 	});
@@ -126,12 +128,26 @@
 		var enabled = enabledCell.text().toLowerCase() == "yes";
 		doAction("toggleUser", 
 			{user: user}, 
-			function(response){
+			function(){
 				button.text((enabled ? "Enable" : "Disable") + " User");
 				enabledCell.text(enabled ? "No" : "Yes");
 				enabledCell.effect("highlight");
 			}
 		);
+	});
+	
+	$(document).on("click", ".delete-authority", function() {
+		var row = $(this).closest("tr");
+		var user = row.find(".email").text();
+		var auth = row.find(".authority").data("auth");
+		doAction("deleteAuthority",
+			{user: user, authority: auth},
+			function() {
+				row.effect("highlight", {color: '#FCC'}, function() {
+					$("#authoritiesTable").DataTable().row(row).remove().draw();
+				});
+			}	
+		)
 	});
 	
 	function doAction(action, params, success, error) {

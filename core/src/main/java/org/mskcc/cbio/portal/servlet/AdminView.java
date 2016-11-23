@@ -66,12 +66,15 @@ public class AdminView extends HttpServlet {
         
     	request.setAttribute(QueryBuilder.HTML_TITLE, "Administrator Tools");
         request.setAttribute("allUsers", userDAO.getAllUsers());
-        request.setAttribute("allUserAuthorities", translateAuthoritiesToDisplay(userDAO.getAllUserAuthorities()));
+        
+        List<UserAuthorities> userAuthorities = userDAO.getAllUserAuthorities();
+        request.setAttribute("allUserAuthorities", userAuthorities);
+        
+        Map<String, String> authMap = translateAuthoritiesToDisplay(userAuthorities);
+        request.setAttribute("authMap", authMap);
         
         try {
         	List<CancerStudy> cancerStudyList = accessControl.getCancerStudies();
-        	logger.warn("Study list: " + cancerStudyList);
-        	logger.warn("Study list size: " + cancerStudyList.size());
         	Map<String, String> studyMap = new HashMap<>();
         	for(CancerStudy study : cancerStudyList) {
         		studyMap.put(study.getCancerStudyStableId(), study.getName());
@@ -91,22 +94,20 @@ public class AdminView extends HttpServlet {
     }
     
     /**
-     * Translate the list of authorities stored in the database into human-readable text.
+     * Generate a dictionary of authorities to human-readable text.
      *  
      * @param userAuthorities the list of authorities to translate
-     * @return a corresponding list of user authorities with authorities replaced with translated text
+     * @return a dictionary with user authorities as the keys, and translated authroity text as the values
      * @see #translateAuthority(String)
      */
-    protected static List<UserAuthorities> translateAuthoritiesToDisplay(List<UserAuthorities> userAuthorities) {
-    	List<UserAuthorities> displayAuthorities = new LinkedList<>();
+    protected static Map<String, String> translateAuthoritiesToDisplay(List<UserAuthorities> userAuthorities) {
+    	Map<String, String> displayMap = new HashMap<>();
         for(UserAuthorities userAuth : userAuthorities) {
-        	Collection<String> translated = new LinkedList<>();
         	for(String auth : userAuth.getAuthorities()) {
-        		translated.add(translateAuthority(auth));
+        		displayMap.put(auth, translateAuthority(auth));
         	}
-        	displayAuthorities.add(new UserAuthorities(userAuth.getEmail(), translated));
         }
-        return displayAuthorities;
+        return displayMap;
     }
     
     /**
