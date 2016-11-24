@@ -238,7 +238,7 @@ public class ModifyAdmin extends HttpServlet {
 				error(response, "Please choose a cancer study.");
 				return;
 			}
-			authority = studyId;
+			authority = studyId.toUpperCase();
 			if(GlobalProperties.filterGroupsByAppName()) {
 				authority = GlobalProperties.getAppName() + ":" + authority;
 			}
