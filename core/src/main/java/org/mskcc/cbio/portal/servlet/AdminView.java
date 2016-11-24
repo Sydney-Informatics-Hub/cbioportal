@@ -26,9 +26,6 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 public class AdminView extends HttpServlet {
 	private static Logger logger = Logger.getLogger(AdminView.class);
 	
-	private static final String DB_CONNECT_ERROR = ("An error occurred while trying to connect to the database." +
-            "  This could happen if the database does not contain any cancer studies.");
-	
 	@Autowired
 	private PortalUserJDBCDAO userDAO;
 	
