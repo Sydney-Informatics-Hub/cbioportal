@@ -103,7 +103,7 @@ public class ModifyAdmin extends HttpServlet {
     private void deleteUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
     	String username = request.getParameter("user");
     	if(StringUtils.isEmpty(username)) {
-    		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid username");
+    		error(response, "Invalid username");
     		return;
     	}
     	User portalUser = userDAO.getPortalUser(username);
@@ -123,7 +123,7 @@ public class ModifyAdmin extends HttpServlet {
     private void toggleUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
     	String username = request.getParameter("user");
     	if(StringUtils.isEmpty(username)) {
-    		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid username");
+    		error(response, "Invalid username");
     		return;
     	}
     	User portalUser = userDAO.getPortalUser(username);
@@ -145,12 +145,12 @@ public class ModifyAdmin extends HttpServlet {
 	private void deleteAuthority(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String[] authorities = request.getParameterValues("authority");
 		if(ArrayUtils.isEmpty(authorities)) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid authority");
+			error(response, "Invalid authority");
     		return;
 		}
 		String username = request.getParameter("user");
     	if(StringUtils.isEmpty(username)) {
-    		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid username");
+    		error(response, "Invalid username");
     		return;
     	}
     	UserAuthorities auth = new UserAuthorities(username, Arrays.asList(authorities));
@@ -212,7 +212,8 @@ public class ModifyAdmin extends HttpServlet {
      * <pre>
      * {
      * 	email: {user email}
-     * 	authority: {human-readable authority}
+     * 	authority: {authority}
+     * 	display: {human-readable authority}
      * }
      * </pre>
      * 
@@ -222,9 +223,9 @@ public class ModifyAdmin extends HttpServlet {
      */
 	@SuppressWarnings("unchecked")
 	private void newAuthority(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String username = request.getParameter("username");
-		if(StringUtils.isEmpty(username)) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Please choose a user.");
+		String email = request.getParameter("email");
+		if(StringUtils.isEmpty(email)) {
+			error(response, "Please choose a user.");
 			return;
 		}
 		boolean admin = !StringUtils.isEmpty(request.getParameter("admin"));
@@ -234,7 +235,7 @@ public class ModifyAdmin extends HttpServlet {
 		} else {
 			String studyId = request.getParameter("studyId");
 			if(StringUtils.isEmpty(studyId)) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Please a cancer study.");
+				error(response, "Please choose a cancer study.");
 				return;
 			}
 			authority = studyId;
@@ -242,11 +243,12 @@ public class ModifyAdmin extends HttpServlet {
 				authority = GlobalProperties.getAppName() + ":" + authority;
 			}
 		}
-		UserAuthorities auth = new UserAuthorities(username, Arrays.asList(authority));
+		UserAuthorities auth = new UserAuthorities(email, Arrays.asList(authority));
 		userDAO.addPortalUserAuthorities(auth);
 		JSONObject result = new JSONObject();
-		result.put("email", username);
-		result.put("authority", AdminView.translateAuthority(authority));
+		result.put("email", email);
+		result.put("authority", authority);
+		result.put("display", AdminView.translateAuthority(authority));
 		result.writeJSONString(response.getWriter());
 	}
 	

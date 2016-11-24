@@ -109,6 +109,44 @@
 				</c:forEach>
 			</tbody>
 		</table>
+		
+		<div class='form'>
+			<button type='button' class='add-authority'>Add Authority</button>
+			<div id='addAuthority'>
+				<div class='error' style='display:none'></div>
+				<form>
+					<div class='form-group'>
+						<label for='addAuthEmail'>User:</label>
+						<select name='email' id='addAuthEmail'>
+							<option />
+							<c:forEach var="user" items="${allUsers}">
+								<option value='${user.email}'>${user.name}</option>
+							</c:forEach>
+						</select>
+					</div>
+					<div class='form-group'>
+						<div class='form-check'>
+							<label class='form-check-label'>
+								<input type='checkbox' name='admin' class='form-check-input' id='adminCheck' /> 
+								Make administrator
+							</label>
+						</div>
+					</div>
+					<div class='form-group'>
+						<label for='addAuthStudy'>Case Study:</label>
+						<select name='studyId' id='addAuthStudy'>
+							<option />
+							<c:forEach var="study" items="${studies}">
+								<option value='${study.key}'>${study.value}</option>
+							</c:forEach>
+						</select>
+					</div>
+					<div class='form-group'>
+						<button type='submit' class='btn btn-primary'>Save</button>
+					</div>
+				</form>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -143,6 +181,8 @@
 				row.effect("highlight", {color: '#FCC'}, function() {
 					$("#userTable").DataTable().row(row).remove().draw();
 					$("#authoritiesTable").DataTable().rows("tr:contains(" + user + ")").remove().draw();
+					$("#addAuthEmail option[value='" + user + "']").remove();
+					$("#addAuthEmail").trigger("liszt:updated");
 				});
 			}
 		);
@@ -197,6 +237,8 @@
 					.append($("<td/>", {class: "enabled", text: user.enabled}))
 					.append(actionCell);
 				$("#userTable").DataTable().row.add(newRow).draw();
+				$("#addAuthEmail").append($("<option/>", {value: user.email, text: user.name}));
+				sortLists();
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
@@ -210,6 +252,66 @@
 		);
 		return false;
 	});
+	
+	$("#addAuthority").hide();
+	$("#addAuthEmail,#addAuthStudy").chosen({width: '100%'});
+	$("button.add-authority").on("click", function() {
+		$(this).hide();
+		$("#addAuthority").show();
+	});
+	
+	$("#adminCheck").on("change", function() {
+		var checked = $(this).prop("checked");
+		var select = $("#addAuthStudy");
+		select.prop("disabled", checked).trigger("liszt:updated");
+		select.closest(".form-group").toggle(!checked);
+	});
+	
+	$("#addAuthority form").on("submit", function() {
+		$("#addAuthority .error").hide();
+		doAction("newAuthority",
+			$(this).serialize(),
+			function(user) {
+				var actionCell = $("#authoritiesTable tr:last td:last").clone();
+				var newRow = $("<tr/>")
+					.append($("<td/>", {class: "email", text: user.email}))
+					.append($("<td/>", {class: "authority", text: user.display, "data-auth": user.authority}))
+					.append(actionCell);
+				$("#authoritiesTable").DataTable().row.add(newRow).draw();
+			},
+			function(obj, status, text) {
+				if(obj.status && obj.status == 400) {
+					$("#addAuthority .error").html(obj.responseText);
+				} else {
+					$("#addAuthority .error").html("An unknown error occurred.");
+				}
+				$("#addAuthority .error").show();
+				console.log(obj, status, text);
+			}
+		);
+		return false;
+	});
+	
+	function sortLists() {
+		$("#addAuthEmail,#addAuthStudy").each(function() {
+			var list = $(this);
+			var options = list.find("option");
+			var selected = list.val();
+			options.sort(function(a, b) {
+				if(!b.value) return 1;
+				else if(!a.value) return -1;
+				else if(b.value == 'all') return 1;
+				else if(a.value == 'all') return -1;
+				else if (a.text > b.text) return 1;
+			    else if (a.text < b.text) return -1;
+			    else return 0
+			});
+ 			list.empty().append(options)
+ 				.val(selected)
+ 				.trigger("liszt:updated");
+		});
+	}
+	sortLists();
 	
 	function doAction(action, params, success, error) {
 		if(typeof error !== 'function') {

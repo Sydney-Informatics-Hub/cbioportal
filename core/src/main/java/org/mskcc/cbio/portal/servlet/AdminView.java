@@ -1,9 +1,7 @@
 package org.mskcc.cbio.portal.servlet;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +77,7 @@ public class AdminView extends HttpServlet {
         	for(CancerStudy study : cancerStudyList) {
         		studyMap.put(study.getCancerStudyStableId(), study.getName());
         	}
+        	studyMap.put("all", "All Cancer Studies");
         	request.setAttribute("studies", studyMap);
         } catch (ProtocolException e) {
             xdebug.logMsg(this, "Got Protocol Exception:  " + e.getMessage());
