@@ -12,14 +12,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.mskcc.cbio.portal.dao.DaoException;
+import org.mskcc.cbio.portal.dao.DaoCancerStudy;
 import org.mskcc.cbio.portal.dao.internal.PortalUserJDBCDAO;
 import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.UserAuthorities;
 import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
 import org.mskcc.cbio.portal.util.XDebug;
-import org.mskcc.cbio.portal.web_api.ProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -32,9 +31,6 @@ public class AdminView extends HttpServlet {
 	
 	@Autowired
 	private PortalUserJDBCDAO userDAO;
-	
-	@Autowired
-	private AccessControl accessControl;
 	
 	@Override
 	public void init() throws ServletException {
@@ -71,21 +67,13 @@ public class AdminView extends HttpServlet {
         Map<String, String> authMap = translateAuthoritiesToDisplay(userAuthorities);
         request.setAttribute("authMap", authMap);
         
-        try {
-        	List<CancerStudy> cancerStudyList = accessControl.getCancerStudies();
-        	Map<String, String> studyMap = new HashMap<>();
-        	for(CancerStudy study : cancerStudyList) {
-        		studyMap.put(study.getCancerStudyStableId(), study.getName());
-        	}
-        	studyMap.put("all", "All Cancer Studies");
-        	request.setAttribute("studies", studyMap);
-        } catch (ProtocolException e) {
-            xdebug.logMsg(this, "Got Protocol Exception:  " + e.getMessage());
-            forwardToErrorPage(request, response, DB_CONNECT_ERROR, xdebug);
-        } catch (DaoException e) {
-        	xdebug.logMsg(this, "Got Database Exception:  " + e.getMessage());
-        	forwardToErrorPage(request, response, DB_CONNECT_ERROR, xdebug);
-		}        	
+    	List<CancerStudy> cancerStudyList = DaoCancerStudy.getAllCancerStudies();
+    	Map<String, String> studyMap = new HashMap<>();
+    	for(CancerStudy study : cancerStudyList) {
+    		studyMap.put(study.getCancerStudyStableId(), study.getName());
+    	}
+    	studyMap.put("all", "All Cancer Studies");
+    	request.setAttribute("studies", studyMap);
         
         RequestDispatcher dispatcher =
                 getServletContext().getRequestDispatcher("/WEB-INF/jsp/admin.jsp");
