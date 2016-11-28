@@ -151,7 +151,11 @@
 </div>
 
 <script>
-	$("#admin-tabs").tabs();
+	$("#admin-tabs").tabs({
+		activate: function(e, ui) {
+			window.location.hash = ui.newPanel.attr('id');
+		}
+	});
 	
 	$("#userTable,#authoritiesTable").DataTable({
 		"sDom": '<"H"<"table-name">fr>t<"F"<"datatable-paging"pil>>',
