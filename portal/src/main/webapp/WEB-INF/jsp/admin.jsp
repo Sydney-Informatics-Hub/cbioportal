@@ -461,7 +461,7 @@
 							text: sample.id
 						}));
 					});
-					if(selectedOption) {
+					if(typeof selectedOption === "string") {
 						$select.val(selectedOption);
 					}
 					sortLists($select);
