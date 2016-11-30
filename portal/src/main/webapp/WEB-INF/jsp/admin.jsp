@@ -40,6 +40,7 @@
 	<ul>
 		<li id='admin-tab-users'><a href='#users' class='admin-tab' title='Users'>Users</a></li>
 		<li id='admin-tab-authorities'><a href='#authorities' class='admin-tab' title='Authorities'>Authorities</a></li>
+		<li id='admin-tab-upload'><a href='#upload' class='admin-tab' title='Upload Files'>Upload Files</a></li>
 	</ul>
 
 
@@ -148,6 +149,64 @@
 			</div>
 		</div>
 	</div>
+	
+	<div class="admin-section" id="upload">
+		<c:if test="${not empty uploadMessage}">
+			<div style="padding:0.5em; margin-bottom:1em;" class="ui-state-highlight ui-corner-all">
+	            <span class="ui-icon ui-icon-info" style="float:left; margin-right:0.3em;"></span>
+	            <c:out value="${uploadMessage}" />
+			</div>
+			<c:remove var="uploadMessage" scope="session"/>
+		</c:if>
+		<c:if test="${not empty uploadError}">
+			<div style="padding:0.5em; margin-bottom:1em; font-size:1em;" class="ui-state-error ui-corner-all">
+	            <span class="ui-icon ui-icon-alert" style="float:left; margin-right:0.3em;"></span>
+	            <c:out value="${uploadError}" />
+			</div>
+			<c:remove var="uploadError" scope="session"/>
+		</c:if>
+		<div>
+			<form enctype="multipart/form-data" method="post" action="admin/upload">
+				<div class='form-group'>
+					<label for='uploadType'>Upload type:</label>
+					<select name='type' id='uploadType'>
+						<option />
+						<c:forEach var='uploadType' items='${uploadTypes}'>
+							<option value='${uploadType}'>${uploadType.description}</option>
+						</c:forEach>
+					</select>
+				</div>
+				<div class='form-group'>
+					<label for='uploadFile'>Choose file:</label>
+					<input id="uploadFile" name="file" type="file" required />
+				</div>
+				<div class='form-group'>
+					<label for='uploadStudy'>Case Study:</label>
+					<select name='studyId' id='uploadStudy'>
+						<option />
+						<c:forEach var="study" items="${studies}">
+							<c:if test="${study.key ne 'all'}">
+								<option value='${study.key}'>${study.value}</option>
+							</c:if>
+						</c:forEach>
+					</select>
+				</div>
+				<div class='form-group needs-study'>
+					<label for='uploadPatient'>Patient:</label>
+					<select name='patientId' id='uploadPatient'>
+					</select>
+				</div>
+				<div class='form-group needs-study needs-patient'>
+					<label for='uploadSample'>Sample:</label>
+					<select name='sampleId' id='uploadSample'>
+					</select>
+				</div>
+				<div class='form-group'>
+					<button type='submit'>Submit</button>
+				</div>
+			</form>
+		</div>
+	</div>
 </div>
 
 <script>
@@ -175,6 +234,11 @@
 	
 	$("#users .table-name").html("Users");
 	$("#authorities .table-name").html("Authorities");
+	
+	$("#addAuthEmail,#addAuthStudy,#uploadType,#uploadStudy,#uploadPatient,#uploadSample").chosen({
+		width: "100%",
+		search_contains: true
+	});
 	
 	$(document).on("click", ".delete-user", function() {
 		var row = $(this).closest("tr");
@@ -242,7 +306,7 @@
 					.append(actionCell);
 				$("#userTable").DataTable().row.add(newRow).draw();
 				$("#addAuthEmail").append($("<option/>", {value: user.email, text: user.name}));
-				sortLists();
+				sortLists($("#addAuthEmail,#addAuthStudy"));
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
@@ -258,7 +322,6 @@
 	});
 	
 	$("#addAuthority").hide();
-	$("#addAuthEmail,#addAuthStudy").chosen({width: '100%'});
 	$("button.add-authority").on("click", function() {
 		$(this).hide();
 		$("#addAuthority").show();
@@ -296,8 +359,8 @@
 		return false;
 	});
 	
-	function sortLists() {
-		$("#addAuthEmail,#addAuthStudy").each(function() {
+	function sortLists($selects) {
+		$selects.each(function() {
 			var list = $(this);
 			var options = list.find("option");
 			var selected = list.val();
@@ -315,7 +378,7 @@
  				.trigger("liszt:updated");
 		});
 	}
-	sortLists();
+	sortLists($("#addAuthEmail,#addAuthStudy"));
 	
 	function doAction(action, params, success, error) {
 		if(typeof error !== 'function') {
@@ -331,6 +394,125 @@
 			error: error
 		});
 	}
+	
+	function loadPatients(preChosenPatient, then) {
+		var studyId = $("#uploadStudy").val();
+		updateUploadForm(
+				$("#uploadPatient"), 
+				$(".needs-study"), 
+				$(".needs-study:not(.needs-patient)"), 
+				"api/patients", 
+				{"study_id": studyId},
+				preChosenPatient,
+				then
+		);
+	}
+	$("#uploadStudy").on("change", loadPatients);
+	
+	function loadSamples(preChosenSample, then) {
+		var studyId = $("#uploadStudy").val();
+		var patientId = $("#uploadPatient").val();
+		
+		updateUploadForm(
+				$("#uploadSample"), 
+				$(".needs-patient"), 
+				$(".needs-patient"), 
+				"api/samples", 
+				{"study_id": studyId, "patient_ids": patientId},
+				preChosenSample,
+				then
+		);
+	}
+	$("#uploadPatient").on("change", loadSamples);
+	
+	function updateUploadForm($select, $hide, $show, apiUrl, params, selectedOption, then) {
+		seeFormParts($hide, false);
+		for(key in params) {
+			if(!params[key]) {
+				doneLoading();
+				return;
+			}
+		}
+		$.ajax(apiUrl, {
+			type: "GET",
+			dataType: "json",
+			data: params,
+			success: doneLoading,
+			error: function(obj, status, text) {
+				doneLoading();
+				console.log(obj,status,text);
+			}
+		});
+		function doneLoading(response) {
+			$select.empty();
+			if(response) {
+				if(response.length == 0) {
+					$select.append($("<option/>", {
+						value: "",
+						text: "None found"
+					}));
+				} else {
+					if(response.length > 1) {
+						$select.append($("<option/>"));
+					}
+					$.each(response, function(i, sample) {
+						$select.append($("<option/>", {
+							value: sample.id,
+							text: sample.id
+						}));
+					});
+					if(selectedOption) {
+						$select.val(selectedOption);
+					}
+					sortLists($select);
+				}
+				seeFormParts($show, true);
+			} else {
+				$select.trigger("liszt:updated");
+			}
+			if(typeof then === 'function') {
+				then();
+			}
+		}
+	}
+	
+	function seeFormParts($parts, show) {
+		$parts.find(".error").remove();
+		$parts.find("select").prop("disabled", !show).trigger("liszt:updated");
+		$parts.toggle(show);
+	}
+	seeFormParts($(".needs-study"), false);
+	
+	$("#upload form").on("submit", function(e) {
+		var valid = true;
+		$(this).find("select").each(function(i, select) {
+			if(!$(select).val()) {
+				var label = $(select).closest("div").find("label");
+				if(!label.find(".error").length) {
+					label.append($("<span/>", {
+						text: "(Please select)",
+						class: "error"
+					}));
+				}
+				valid = false;
+			}
+		});
+		if(!valid) {
+			e.preventDefault();
+			return false;
+		}
+	});
+	
+	$("#uploadFile").on("change", function() {
+		var filename = $(this).val().split('\\').pop();
+		var parts = filename.split(".");
+		if(parts.length == 4) {
+			$("#uploadStudy").val(parts[0]).trigger("liszt:updated");
+			loadPatients(parts[1], function(){
+				loadSamples(parts[2]);
+			});
+		}
+	});
 </script>
 
 <%-- End of page --%>

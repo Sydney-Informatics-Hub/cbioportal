@@ -587,6 +587,14 @@
         <url-pattern>/admin</url-pattern>
     </servlet-mapping>
 	<servlet>
+        <servlet-name>admin_upload</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.UploadPDFServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>admin_upload</servlet-name>
+        <url-pattern>/admin/upload</url-pattern>
+    </servlet-mapping>
+	<servlet>
         <servlet-name>admin_modify</servlet-name>
         <servlet-class>org.mskcc.cbio.portal.servlet.ModifyAdmin</servlet-class>
     </servlet>
