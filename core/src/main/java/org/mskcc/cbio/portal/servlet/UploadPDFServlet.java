@@ -113,6 +113,9 @@ public class UploadPDFServlet extends HttpServlet {
         case CA125_PLOT:
         	baseFilename = GlobalProperties.getInternalCa125PlotRoot();
         	break;
+        case MOLECULAR_TESTING_REPORT:
+        	baseFilename = GlobalProperties.getInternalMolecularTestingRoot();
+        	break;
         default:
         	returnWithError(request, response, "Invalid upload type.");
         	return;

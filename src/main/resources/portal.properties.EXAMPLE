@@ -125,6 +125,7 @@ tcga_path_report.url=https://github.com/cbioportal/datahub/raw/master/tcga/patho
 patient_view.use_internal_path_report=true
 patient_view.internal_path_report_root=
 patient_view.internal_ca125_plot_root=
+patient_view.internal_molecular_testing_report_root=
 
 # various url's
 segfile.url=http://cbio.mskcc.org/cancergenomics/gdac-portal/seg/

@@ -91,6 +91,13 @@
     line='patient_view.internal_ca125_plot_root={{ internal_ca125_plot_root }}'
   when: internal_ca125_plot_root is defined and internal_ca125_plot_root != "" and internal_ca125_plot_root != None
 
+- name: Update the portal properties with the internal molecular testing report root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_molecular_testing_report_root='
+    line='patient_view.internal_molecular_testing_report_root={{ internal_molecular_testing_report_root }}'
+  when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
+
 - name: Update the portal properties with the service login initiation url
   lineinfile: > 
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
