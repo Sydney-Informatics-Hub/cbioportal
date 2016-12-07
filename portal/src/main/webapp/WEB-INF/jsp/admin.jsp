@@ -172,7 +172,7 @@
 					<select name='type' id='uploadType'>
 						<option />
 						<c:forEach var='uploadType' items='${uploadTypes}'>
-							<option value='${uploadType}'>${uploadType.description}</option>
+							<option value='${uploadType}' class='${uploadType.needsStudy ? "req-study":""}${uploadType.needsPatient ? " req-patient":""}${uploadType.needsSample ? " req-sample":""}'>${uploadType.description}</option>
 						</c:forEach>
 					</select>
 				</div>
@@ -407,7 +407,11 @@
 				then
 		);
 	}
-	$("#uploadStudy").on("change", loadPatients);
+	$("#uploadStudy").on("change", function() {
+		if($("#uploadPatient").is(".required")) {
+			loadPatients();
+		}
+	});
 	
 	function loadSamples(preChosenSample, then) {
 		var studyId = $("#uploadStudy").val();
@@ -423,7 +427,11 @@
 				then
 		);
 	}
-	$("#uploadPatient").on("change", loadSamples);
+	$("#uploadPatient").on("change", function() {
+		if($("#uploadSample").is(".required")) {
+			loadSamples();
+		}
+	});
 	
 	function updateUploadForm($select, $hide, $show, apiUrl, params, selectedOption, then) {
 		seeFormParts($hide, false);
@@ -485,7 +493,7 @@
 	
 	$("#upload form").on("submit", function(e) {
 		var valid = true;
-		$(this).find("select").each(function(i, select) {
+		$(this).find("select.required").each(function(i, select) {
 			if(!$(select).val()) {
 				var label = $(select).closest("div").find("label");
 				if(!label.find(".error").length) {
@@ -512,6 +520,17 @@
 				loadSamples(parts[2]);
 			});
 		}
+	});
+	
+	$("#uploadType").on("change", function() {
+		var $opt = $(this).find("option:selected");
+		$("#uploadStudy").toggleClass("required", $opt.is(".req-study"));
+		$("#uploadPatient").toggleClass("required", $opt.is(".req-patient"));
+		$("#uploadSample").toggleClass("required", $opt.is(".req-sample"));
+	});
+	
+	$("select").on("change", function() {
+		$(this).closest("div").find("label .error").remove();
 	});
 </script>
 

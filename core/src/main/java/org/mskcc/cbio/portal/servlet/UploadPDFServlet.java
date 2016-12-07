@@ -53,7 +53,6 @@ public class UploadPDFServlet extends HttpServlet {
         	return;
         }
         
-        
         PdfUploadType type = null;
         String studyId = null;
         String patientId = null;
@@ -74,21 +73,21 @@ public class UploadPDFServlet extends HttpServlet {
 						type = PdfUploadType.valueOf(value);
 						break;
 					case "studyId":
-						if(value == null) {
+						if(value == null && type.isNeedsStudy()) {
 							returnWithError(request, response, "Please choose a cancer study.");
 							return;
 						}
 						studyId = value;
 						break;
 					case "patientId":
-						if(value == null) {
+						if(value == null && type.isNeedsPatient()) {
 							returnWithError(request, response, "Please choose a patient.");
 							return;
 						}
 						patientId = value;
 						break;
 					case "sampleId":
-						if(value == null) {
+						if(value == null && type.isNeedsSample()) {
 							returnWithError(request, response, "Please choose a sample.");
 							return;
 						}
@@ -121,7 +120,7 @@ public class UploadPDFServlet extends HttpServlet {
         	return;
         }
         
-        String filename = studyId + "." + patientId + "." + sampleId + ".pdf";
+        String filename = type.getFilename(studyId, patientId, sampleId);
         
         if(file == null) {
         	returnWithError(request, response, "Please upload a PDF file.");
