@@ -64,6 +64,14 @@
   become: yes
   when: internal_ca125_plot_root is defined and internal_ca125_plot_root != "" and internal_ca125_plot_root != None
 
+- name: Create the internal molecular testing report root directory if it doesn't exist
+  file: >
+    path={{ internal_molecular_testing_report_root }}
+    state=directory
+    mode=0755
+  become: yes
+  when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
+
 - name: Copy the example global confirguration properties file
   copy: >
     src={{ cbioportal_root }}/src/main/resources/portal.properties.EXAMPLE
