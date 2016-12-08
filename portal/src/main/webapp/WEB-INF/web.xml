@@ -447,6 +447,15 @@
         <servlet-name>pathology_report_view</servlet-name>
         <url-pattern>/pathology_report/*</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>molecular_testing_report_view</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.MolecularTestingReportView</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>molecular_testing_report_view</servlet-name>
+        <url-pattern>/molecular_testing_report/*</url-pattern>
+    </servlet-mapping>
     
     <servlet>
         <servlet-name>ca125_plot_view</servlet-name>

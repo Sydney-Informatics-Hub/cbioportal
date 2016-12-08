@@ -108,6 +108,7 @@ public class PatientView extends HttpServlet {
     public static final String CLINICAL_ATTRIBUTES = "clinical_attributes";
     public static final String TISSUE_IMAGES = "tissue_images";
     public static final String PATH_REPORT_URL = "path_report_url";
+    public static final String MOLECULAR_TESTING_REPORT_URL = "molecular_testing_report_url";
     public static final String CA125_PLOT_URL = "ca125_plot_url";
     public static final String CLINICAL_ATTRIBUTE_OTHER_PAPTEINT_ID = "OTHER_PATIENT_ID";
     public static final String CLINICAL_ATTRIBUTE_OTHER_SAMPLE_ID = "OTHER_SAMPLE_ID";
@@ -487,6 +488,7 @@ public class PatientView extends HttpServlet {
         }
         
         setCA125PlotURL(cancerStudy, patientId, request);
+        setMolecularTestingReportUrl(cancerStudy, patientId, samples, isPatientView, request);
         
         // path report
         if (GlobalProperties.useInternalPathReports()) {
@@ -524,6 +526,30 @@ public class PatientView extends HttpServlet {
         if (reportFileName != null && new File(reportRootDir, reportFileName).exists()) {
             request.setAttribute(PATH_REPORT_URL, "pathology_report/" + reportFileName);
         }
+    }
+    
+    private void setMolecularTestingReportUrl(CancerStudy cancerStudy, String patientId, List<String> sampleIds, 
+    		boolean isPatientView, HttpServletRequest request) {
+    	final String reportRootDir = GlobalProperties.getInternalMolecularTestingRoot();
+    	String reportFileName = null;
+    	if (isPatientView) {
+    		java.util.Collections.sort(sampleIds); // sort sampleIds alphabetically
+    		for (String sample : sampleIds) {
+    			logger.debug("Checking for internal molecular testing report for sample: " + sample);
+    			final String sampleReportName = cancerStudy.getCancerStudyStableId() + "." + patientId + "." 
+    					+ sample + ".pdf";
+    			if (new File(reportRootDir, sampleReportName).exists()) {
+    				logger.debug("Internal pathology report found");
+    				reportFileName = sampleReportName;
+    				break;
+    			}
+    		}            
+    	} else {
+    		reportFileName = cancerStudy.getCancerStudyStableId() + "." + patientId + "." + sampleIds.get(0) + ".pdf";
+    	}
+    	if (reportFileName != null && new File(reportRootDir, reportFileName).exists()) {
+    		request.setAttribute(MOLECULAR_TESTING_REPORT_URL, "molecular_testing_report/" + reportFileName);
+    	}
     }
     
     private void setCA125PlotURL(CancerStudy cancerStudy, String patientId, HttpServletRequest request) {

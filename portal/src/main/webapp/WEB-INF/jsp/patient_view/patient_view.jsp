@@ -87,6 +87,7 @@ jsonClinicalAttributes = jsonMapper.writeValueAsString((Map<String,String>)reque
 boolean showTimeline = (Boolean)request.getAttribute("has_timeline_data");
 
 String pathReportUrl = (String)request.getAttribute(PatientView.PATH_REPORT_URL);
+String molecularTestingUrl = (String)request.getAttribute(PatientView.MOLECULAR_TESTING_REPORT_URL);
 String ca125PlotUrl = (String)request.getAttribute(PatientView.CA125_PLOT_URL);
 boolean showCa125 = isPatientView && ca125PlotUrl!=null;
 
@@ -205,6 +206,10 @@ if (patientViewError!=null) {
     <%if(pathReportUrl!=null){%>
     <li><a id="link-path-report" href='#tab_path-report' class='patient-tab'>Pathology Report</a></li>
     <%}%>
+    
+    <%if(molecularTestingUrl!=null){%>
+    <li><a id="link-mol-testing-report" href='#tab_mol-testing-report' class='patient-tab'>Molecular Testing Report</a></li>
+    <%}%>
 
     <%if(showCa125){%>
     <li><a id="link-ca125-plot" href='#tab_ca125-plot' class='patient-tab'>CA125 Plot</a></li>
@@ -252,6 +257,12 @@ if (patientViewError!=null) {
     </div>
     <%}%>
 
+    <%if(molecularTestingUrl!=null){%>
+    <div class="patient-section" id="tab_mol-testing-report">
+        <%@ include file="molecular_testing_report.jsp" %>
+    </div>
+    <%}%>
+    
     <%if(showCa125){%>
     <div class="patient-section" id="tab_ca125-plot">
         <%@ include file="ca125_plot.jsp" %>
