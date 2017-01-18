@@ -15,8 +15,9 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
+import org.mskcc.cbio.portal.tool.PyramidImageProcessor;
 import org.mskcc.cbio.portal.util.GlobalProperties;
-import org.mskcc.cbio.portal.util.PdfUploadType;
+import org.mskcc.cbio.portal.util.FileUploadType;
 import org.mskcc.cbio.portal.util.XDebug;
 
 public class UploadPDFServlet extends HttpServlet {
@@ -53,7 +54,7 @@ public class UploadPDFServlet extends HttpServlet {
         	return;
         }
         
-        PdfUploadType type = null;
+        FileUploadType type = null;
         String studyId = null;
         String patientId = null;
         String sampleId = null;
@@ -70,7 +71,7 @@ public class UploadPDFServlet extends HttpServlet {
 							returnWithError(request, response, "Please choose an upload type.");
 							return;
 						}
-						type = PdfUploadType.valueOf(value);
+						type = FileUploadType.valueOf(value);
 						break;
 					case "studyId":
 						if(value == null && type.isNeedsStudy()) {
@@ -95,9 +96,7 @@ public class UploadPDFServlet extends HttpServlet {
 						break;
 					}
 				} else {
-					if(item.getName().toLowerCase().endsWith(".pdf")) {
-						file = item;
-					}
+					file = item;
 				}
 			}
 		} catch (FileUploadException e) {
@@ -105,6 +104,7 @@ public class UploadPDFServlet extends HttpServlet {
 		}
 		
 		String baseFilename = null;
+		String expectedExtension = type.getFileExtension();
         switch(type){
         case PATHOLOGY_REPORT:
         	baseFilename = GlobalProperties.getInternalPathReportRoot();
@@ -115,27 +115,45 @@ public class UploadPDFServlet extends HttpServlet {
         case MOLECULAR_TESTING_REPORT:
         	baseFilename = GlobalProperties.getInternalMolecularTestingRoot();
         	break;
+        case SLIDE_IMAGE:
+        	break;
         default:
         	returnWithError(request, response, "Invalid upload type.");
         	return;
         }
         
-        String filename = type.getFilename(studyId, patientId, sampleId);
         
         if(file == null) {
-        	returnWithError(request, response, "Please upload a PDF file.");
+        	returnWithError(request, response, "Please choose a file to upload.");
+        	return;
+        }
+        if(!file.getName().toLowerCase().endsWith(expectedExtension)) {
+        	returnWithError(request, response, "Please choose a " + expectedExtension + " file.");
         	return;
         }
         
-        File fullFile = new File(baseFilename, filename);
-        try {
-			file.write(fullFile);
-		} catch (Exception e) {
-			returnWithError(request, response, "Error saving file to disk.");
-			return;
-		}
-        
-        returnWithInfo(request, response, "Successfully saved " + type.getDescription() + ": " + fullFile.getName());
+        String filename = null;
+        switch(type){
+        case PATHOLOGY_REPORT:
+        case CA125_PLOT:
+        case MOLECULAR_TESTING_REPORT:
+        	filename = type.getFilename(studyId, patientId, sampleId);
+        	File fullFile = new File(baseFilename, filename);
+            try {
+    			file.write(fullFile);
+    		} catch (Exception e) {
+    			returnWithError(request, response, "Error saving file to disk.");
+    			return;
+    		}
+            returnWithInfo(request, response, "Successfully saved " + type.getDescription() + ": " + fullFile.getName());
+        	break;
+        case SLIDE_IMAGE:
+        	filename = type.getNextAvailableFilename(PyramidImageProcessor.CONVERTED_DIR, studyId, patientId, sampleId);
+        	PyramidImageProcessor.store(file, filename);
+        	PyramidImageProcessor.convertToDzi(filename);
+        	returnWithInfo(request, response, "Successfully uploaded and converted " + type.getDescription() + ": " + filename);
+        	break;
+        }
     }
     private void returnWithInfo(HttpServletRequest request, HttpServletResponse response, String message) throws IOException {
     	request.getSession().setAttribute("uploadMessage", message);
