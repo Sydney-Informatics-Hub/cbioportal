@@ -155,6 +155,10 @@
 			<div style="padding:0.5em; margin-bottom:1em;" class="ui-state-highlight ui-corner-all">
 	            <span class="ui-icon ui-icon-info" style="float:left; margin-right:0.3em;"></span>
 	            <c:out value="${uploadMessage}" />
+	            <c:if test="${not empty uploadSubMessage}">
+	            	<br/>
+	            	<span class="subMessage"><c:out value="${uploadSubMessage}" /></span>
+	            </c:if>
 			</div>
 			<c:remove var="uploadMessage" scope="session"/>
 		</c:if>
@@ -578,6 +582,10 @@
     }
     label {
     	font-weight: normal;
+    }
+    .subMessage {
+    	font-size: small;
+    	font-style: italic;
     }
 </style>
 

@@ -23,7 +23,9 @@ public class PyramidImageProcessor {
 	public static final File CONVERTED_DIR = new File(GlobalProperties.getInternalSlideImagesRoot(), "converted/");
 	private static final String VIPS_COMMAND = "vips dzsave %s %s";
 	
-	public static boolean store(FileItem image, String svsImageName) {
+	private static TimeApproximator convertTime = new TimeApproximator(21300, 26400000, 0.3);
+	
+	public static File store(FileItem image, String svsImageName) {
 		if(!PROCESSING_DIR.exists()) {
 			log.info("Creating directory " + PROCESSING_DIR.getAbsolutePath());
 			PROCESSING_DIR.mkdirs();
@@ -34,12 +36,12 @@ public class PyramidImageProcessor {
 			image.write(file);
 		} catch (Exception e) {
 			log.error("Unable to save slide image at " + file.getAbsolutePath(), e);
-			return false;
+			return null;
 		}
-		return true;
+		return file;
 	}
 	
-	public static long convertToDzi(String svsImageName) throws IOException {
+	public static long convertToDzi(final String svsImageName) throws IOException {
 		if(!new File(PROCESSING_DIR, svsImageName).exists()) {
 			log.warn("Attempted to convert image that doesn't exist: " + svsImageName);
 			return -1;
@@ -55,9 +57,9 @@ public class PyramidImageProcessor {
 			CONVERTED_DIR.mkdirs();
 		}
 		
-		long startTime = System.currentTimeMillis();
+		final long startTime = System.currentTimeMillis();
 		Runtime rt = Runtime.getRuntime();
-		String command = String.format(VIPS_COMMAND, from, to);
+		final String command = String.format(VIPS_COMMAND, from, to);
 		log.debug("Executing \"" + command + "\"");
 		final Process p = rt.exec(command, null, dir);
 		new Thread(new Runnable() {
@@ -74,18 +76,46 @@ public class PyramidImageProcessor {
 				}
 			}
 		}).start();
-		try {
-			p.waitFor();
-			long timeTaken = System.currentTimeMillis() - startTime;
-			log.info(String.format("Command \"%s\" completed in %.1f s", command, timeTaken / 1000.0));
-			File svsFile = new File(PROCESSING_DIR, svsImageName);
-			log.debug("Deleting " + svsFile.getName());
-			svsFile.delete();
-			return timeTaken;
-		} catch (InterruptedException e) {
-			log.error("Interrupted while converting " + svsImageName);
-			return -1;
-		}
+		
+		final File svsFile = new File(PROCESSING_DIR, svsImageName);
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					p.waitFor();
+					long timeTaken = System.currentTimeMillis() - startTime;
+					log.info(String.format("Command \"%s\" completed in %.1f s", command, timeTaken / 1000.0));
+					convertTime.register(timeTaken, svsFile.length());
+					log.debug("Deleting " + svsFile.getName());
+					svsFile.delete();
+				} catch (InterruptedException e) {
+					log.error("Interrupted while converting " + svsImageName);
+				}
+			}
+		}).start();
+			
+		return convertTime.guessTime(svsFile.length());
 	}
 
+	private static class TimeApproximator {
+		private double value;
+		private final double initWeight;
+		private int num;
+		public TimeApproximator(long initialTime, long initialSize, double initialWeight) {
+			this.value = (double)initialTime/initialSize;
+			this.initWeight = initialWeight;
+			num = 0;
+		}
+		void register(long time, long size) {
+			if(num == 0) {
+				value = ((value * initWeight) + ((double)time / size)) / (++num + initWeight);
+			} else {
+				value += (((double)time / size) - value) / (++num + initWeight);
+			}
+		}
+		long guessTime(long size) {
+			return (long) (value * size);
+		}
+	}
 }

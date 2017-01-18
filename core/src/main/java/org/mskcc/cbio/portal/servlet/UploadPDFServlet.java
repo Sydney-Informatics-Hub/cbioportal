@@ -145,23 +145,32 @@ public class UploadPDFServlet extends HttpServlet {
     			returnWithError(request, response, "Error saving file to disk.");
     			return;
     		}
-            returnWithInfo(request, response, "Successfully saved " + type.getDescription() + ": " + fullFile.getName());
+            returnWithInfo(request, response, "Successfully saved " + type.getDescription() + ": " + fullFile.getName(), null);
         	break;
         case SLIDE_IMAGE:
         	filename = type.getNextAvailableFilename(PyramidImageProcessor.CONVERTED_DIR, studyId, patientId, sampleId);
         	PyramidImageProcessor.store(file, filename);
-        	PyramidImageProcessor.convertToDzi(filename);
-        	returnWithInfo(request, response, "Successfully uploaded and converted " + type.getDescription() + ": " + filename);
+        	long expected = PyramidImageProcessor.convertToDzi(filename);
+        	returnWithInfo(request, response, 
+        			"Successfully uploaded " + type.getDescription() + ": " + filename, 
+        			"The file will now be processed and then made available for viewing (approximate processing time: " + formatTime(expected) + ")");
         	break;
         }
     }
-    private void returnWithInfo(HttpServletRequest request, HttpServletResponse response, String message) throws IOException {
+    private void returnWithInfo(HttpServletRequest request, HttpServletResponse response, String message, String subMessage) throws IOException {
     	request.getSession().setAttribute("uploadMessage", message);
+    	request.getSession().setAttribute("uploadSubMessage", subMessage);
     	response.sendRedirect("../admin#upload");
     }
     private void returnWithError(HttpServletRequest request, HttpServletResponse response, String message) throws IOException {
     	request.getSession().setAttribute("uploadError", message);
     	response.sendRedirect("../admin#upload");
+    }
+    
+    private static String formatTime(long millis) {
+    	int mins = (int) (millis / 60000);
+    	int seconds = (int) Math.ceil((millis - (mins * 60000)) / 1000.0);
+    	return (mins > 0 ? (mins + " min ") : "") + seconds + " second" + (seconds == 1 ? "" : "s");
     }
 	
 	private void forwardToErrorPage(HttpServletRequest request, HttpServletResponse response, String userMessage,
