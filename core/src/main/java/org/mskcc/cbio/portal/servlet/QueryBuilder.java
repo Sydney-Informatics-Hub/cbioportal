@@ -59,6 +59,7 @@ import java.rmi.RemoteException;
 public class QueryBuilder extends HttpServlet {
     public static final String CLIENT_TRANSPOSE_MATRIX = "transpose_matrix";
     public static final String CANCER_TYPES_INTERNAL = "cancer_types";
+    public static final String AVAILABLE_CANCER_STUDIES = "my_cancer_studies";
     public static final String PROFILE_LIST_INTERNAL = "profile_list";
     public static final String CASE_SETS_INTERNAL = "case_sets";
     public static final String CANCER_STUDY_ID = "cancer_study_id";
@@ -87,6 +88,7 @@ public class QueryBuilder extends HttpServlet {
     public static final String TAB_INDEX = "tab_index";
     public static final String TAB_DOWNLOAD = "tab_download";
     public static final String TAB_VISUALIZE = "tab_visualize";
+    public static final String TAB_LOOKUP = "tab_lookup";
     public static final String USER_ERROR_MESSAGE = "user_error_message";
     public static final String ATTRIBUTE_URL_BEFORE_FORWARDING = "ATTRIBUTE_URL_BEFORE_FORWARDING";
     public static final String Z_SCORE_THRESHOLD = "Z_SCORE_THRESHOLD";
@@ -167,6 +169,25 @@ public class QueryBuilder extends HttpServlet {
 
         //  Get User Selected Action
         String action = httpServletRequest.getParameter(ACTION_NAME);
+        String tabIndex = httpServletRequest.getParameter(TAB_INDEX);
+        // Check if submitting our form
+        if (ACTION_SUBMIT.equals(action) && TAB_LOOKUP.equals(tabIndex)) {
+        	// Check if our form is valid
+        	String patientId = (String) httpServletRequest.getParameter("lookupPatientId");
+        	String studyId = (String) httpServletRequest.getParameter("lookupStudyId");
+        	boolean isValid = validateLookupForm(studyId, patientId);
+        	if (isValid) {
+        		String url = String.format("case.do?cancer_study_id=%s&case_id=%s", studyId, patientId);
+        		httpServletResponse.sendRedirect(url);
+        	} else {
+				httpServletRequest.setAttribute(QueryBuilder.USER_ERROR_MESSAGE, 
+						"Invalid study or patient. Please check the form below.");
+				RequestDispatcher dispatcher = getServletContext()
+						.getRequestDispatcher("/WEB-INF/jsp/index.jsp");
+				dispatcher.forward(httpServletRequest, httpServletResponse);
+        	}
+        	return;
+        }
         
         String patientCaseSelect = httpServletRequest.getParameter(PATIENT_CASE_SELECT);
 
@@ -194,7 +215,15 @@ public class QueryBuilder extends HttpServlet {
             
             httpServletRequest.setAttribute(CANCER_STUDY_ID, cancerTypeId);
             httpServletRequest.setAttribute(CANCER_TYPES_INTERNAL, cancerStudyList);
-
+            
+            List<CancerStudy> myCancerStudies = new LinkedList<CancerStudy>();
+            for(CancerStudy study : cancerStudyList) {
+            	if(!study.getCancerStudyStableId().equals(AccessControl.ALL_CANCER_STUDIES_ID)) {
+            		myCancerStudies.add(study);
+            	}
+            }
+            httpServletRequest.setAttribute(AVAILABLE_CANCER_STUDIES, myCancerStudies);
+            
             //  Get Genetic Profiles for Selected Cancer Type
             ArrayList<GeneticProfile> profileList = GetGeneticProfiles.getGeneticProfiles
                 (cancerTypeId);
@@ -555,6 +584,24 @@ public class QueryBuilder extends HttpServlet {
         } 
 
         return errorsExist;
+    }
+    
+    private boolean validateLookupForm(String studyId, String patientId) {
+    	List<CancerStudy> studies;
+		try {
+			studies = accessControl.isAccessibleCancerStudy(studyId);
+		} catch (DaoException e) {
+			return false;
+		}
+    	if (studies.size() != 1) {
+    		return false;
+    	}
+    	CancerStudy study = studies.get(0);
+    	Patient patient = DaoPatient.getPatientByCancerStudyAndPatientId(study.getInternalId(), patientId);
+    	if (patient == null) {
+    		return false;
+    	}
+    	return true;
     }
 
     private void forwardToErrorPage(HttpServletRequest request, HttpServletResponse response,

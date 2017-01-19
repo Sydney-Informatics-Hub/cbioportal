@@ -70,7 +70,7 @@
         localRppaScoreThreshold = "2.0";
     }
     if (localTabIndex == null) {
-        localTabIndex = QueryBuilder.TAB_VISUALIZE;
+        localTabIndex = QueryBuilder.TAB_LOOKUP;
     } else {
         localTabIndex = URLEncoder.encode(localTabIndex);
     }
@@ -137,13 +137,17 @@
 <div class="main_query_panel">
     <div id="main_query_form">
         <form id="main_form" name="main_form" action="index.do" method="post">
-        <%@ include file="step1_json.jsp" %>
-        <%@ include file="step2_json.jsp" %>
-        <%@ include file="step3_json.jsp" %>
-        <%@ include file="step4_json.jsp" %>
-        <%@ include file="step5_json.jsp" %>
-        <input type="hidden" id="clinical_param_selection" name="clinical_param_selection"
-        	value='<%= request.getParameter("clinical_param_selection") %>'>
+        <% if(localTabIndex.equals(QueryBuilder.TAB_LOOKUP)){ %>
+        	<%@ include file="patient_lookup.jsp" %>
+        <% } else { %>
+	        <%@ include file="step1_json.jsp" %>
+	        <%@ include file="step2_json.jsp" %>
+	        <%@ include file="step3_json.jsp" %>
+	        <%@ include file="step4_json.jsp" %>
+	        <%@ include file="step5_json.jsp" %>
+	        <input type="hidden" id="clinical_param_selection" name="clinical_param_selection"
+	        	value='<%= request.getParameter("clinical_param_selection") %>'>
+        <% } %>
         <input type="hidden" id="<%= QueryBuilder.TAB_INDEX %>" name="<%= QueryBuilder.TAB_INDEX %>"
            value="<%= localTabIndex %>">
         <p>

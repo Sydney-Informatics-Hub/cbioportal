@@ -84,7 +84,7 @@ public class AdminView extends HttpServlet {
      * Generate a dictionary of authorities to human-readable text.
      *  
      * @param userAuthorities the list of authorities to translate
-     * @return a dictionary with user authorities as the keys, and translated authroity text as the values
+     * @return a dictionary with user authorities as the keys, and translated authority text as the values
      * @see #translateAuthority(String)
      */
     protected static Map<String, String> translateAuthoritiesToDisplay(List<UserAuthorities> userAuthorities) {
@@ -106,7 +106,7 @@ public class AdminView extends HttpServlet {
      * 		<li>"app_name:studyId" -> "Access to study: studyId"</li>
      * 		</ul>
      * 
-     * @param authority the text to translate
+     * @param authority of the text to translate
      * @return human-readable version of the authority
      */
     protected static String translateAuthority(String authority) {
