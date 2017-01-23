@@ -93,6 +93,8 @@
 		</div>
 	</div>
 	
+	<div id="userConfirm" class="dialog-confirm" title="Delete user">Are you sure you want to delete this user?</div>
+	
 	<div class="admin-section" id="authorities">
 	    <table id='authoritiesTable' class='display'>
 			<thead>
@@ -149,6 +151,8 @@
 			</div>
 		</div>
 	</div>
+	
+	<div id="authorityConfirm" class="dialog-confirm" title="Remove authority">Are you sure you want to remove this authority?</div>
 	
 	<div class="admin-section" id="upload">
 		<c:if test="${not empty uploadMessage}">
@@ -240,20 +244,38 @@
 		search_contains: true
 	});
 	
+	$("#userConfirm").hide();
+	$("#authorityConfirm").hide();
+	
 	$(document).on("click", ".delete-user", function() {
 		var row = $(this).closest("tr");
-		var user = row.find(".email").text();
-		doAction("deleteUser", 
-			{user: user}, 
-			function(response){
-				row.effect("highlight", {color: '#FCC'}, function() {
-					$("#userTable").DataTable().row(row).remove().draw();
-					$("#authoritiesTable").DataTable().rows("tr:contains(" + user + ")").remove().draw();
-					$("#addAuthEmail option[value='" + user + "']").remove();
-					$("#addAuthEmail").trigger("liszt:updated");
-				});
-			}
-		);
+	    $( "#userConfirm" ).dialog({
+	      resizable: false,
+	      height: "auto",
+	      width: 300,
+	      modal: true,
+	      buttons: {
+	        "Delete user": function() {
+				var user = row.find(".email").text();
+				var auth = row.find(".authority").data("auth");
+				doAction("deleteUser",
+					{user: user},
+					function() {
+						row.effect("highlight", {color: '#FCC'}, function() {
+							$("#userTable").DataTable().row(row).remove().draw();
+							$("#authoritiesTable").DataTable().rows("tr:contains(" + user + ")").remove().draw();
+							$("#addAuthEmail option[value='" + user + "']").remove();
+							$("#addAuthEmail").trigger("liszt:updated");
+						});
+					}	
+				)
+				$(this).dialog("close");	
+	        },
+	        "Cancel": function() {
+	          $( this ).dialog("close");
+	        }
+	      }
+	    });    
 	});
 	
 	$(document).on("click", ".toggle-user", function() {
@@ -274,16 +296,30 @@
 	
 	$(document).on("click", ".delete-authority", function() {
 		var row = $(this).closest("tr");
-		var user = row.find(".email").text();
-		var auth = row.find(".authority").data("auth");
-		doAction("deleteAuthority",
-			{user: user, authority: auth},
-			function() {
-				row.effect("highlight", {color: '#FCC'}, function() {
-					$("#authoritiesTable").DataTable().row(row).remove().draw();
-				});
-			}	
-		)
+	    $("#authorityConfirm").dialog({
+	      resizable: false,
+	      height: "auto",
+	      width: 300,
+	      modal: true,
+	      buttons: {
+	        "Remove authority": function() {
+				var user = row.find(".email").text();
+				var auth = row.find(".authority").data("auth");
+				doAction("deleteAuthority",
+					{user: user, authority: auth},
+					function() {
+						row.effect("highlight", {color: '#FCC'}, function() {
+							$("#authoritiesTable").DataTable().row(row).remove().draw();
+						});
+					}	
+				)
+				$(this).dialog("close");	
+	        },
+	        "Cancel": function() {
+	          $( this ).dialog("close");
+	        }
+	      }
+	    });    
 	});
 	
 	$("#addUser").hide();
