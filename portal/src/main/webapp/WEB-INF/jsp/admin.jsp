@@ -81,7 +81,7 @@
 						<div class='form-check'>
 							<label class='form-check-label'>
 								<input type='checkbox' name='enabled' checked='checked' class='form-check-input' /> 
-								Enabled
+								Enable user
 							</label>
 						</div>
 					</div>
@@ -181,7 +181,7 @@
 					<input id="uploadFile" name="file" type="file" required />
 				</div>
 				<div class='form-group'>
-					<label for='uploadStudy'>Case Study:</label>
+					<label for='uploadStudy'>Case study:</label>
 					<select name='studyId' id='uploadStudy'>
 						<option />
 						<c:forEach var="study" items="${studies}">
@@ -490,6 +490,8 @@
 		$parts.toggle(show);
 	}
 	seeFormParts($(".needs-study"), false);
+	$("#uploadType").addClass("required");
+	$("#uploadStudy").addClass("required");
 	
 	$("#upload form").on("submit", function(e) {
 		var valid = true;
@@ -527,6 +529,9 @@
 		$("#uploadStudy").toggleClass("required", $opt.is(".req-study"));
 		$("#uploadPatient").toggleClass("required", $opt.is(".req-patient"));
 		$("#uploadSample").toggleClass("required", $opt.is(".req-sample"));
+		if($("uploadPatient").is(".required") && $("#uploadStudy").val()) {
+			loadPatients();
+		}
 	});
 	
 	$("select").on("change", function() {
