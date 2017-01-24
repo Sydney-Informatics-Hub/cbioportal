@@ -604,6 +604,14 @@
         <url-pattern>/admin/upload</url-pattern>
     </servlet-mapping>
 	<servlet>
+        <servlet-name>admin_upload_progress</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.FileUploadProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>admin_upload_progress</servlet-name>
+        <url-pattern>/admin/upload/progress</url-pattern>
+    </servlet-mapping>
+	<servlet>
         <servlet-name>admin_modify</servlet-name>
         <servlet-class>org.mskcc.cbio.portal.servlet.ModifyAdmin</servlet-class>
     </servlet>

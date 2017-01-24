@@ -25,6 +25,10 @@ public class PyramidImageProcessor {
 	
 	private static TimeApproximator convertTime = new TimeApproximator(21300, 26400000, 0.3);
 	
+	public static long getConvertTime(long fileSize) {
+		return convertTime.guessTime(fileSize);
+	}
+	
 	public static File store(FileItem image, String svsImageName) {
 		if(!PROCESSING_DIR.exists()) {
 			log.info("Creating directory " + PROCESSING_DIR.getAbsolutePath());
@@ -41,16 +45,17 @@ public class PyramidImageProcessor {
 		return file;
 	}
 	
-	public static long convertToDzi(final String svsImageName) throws IOException {
+	public static void convertToDzi(final String svsImageName) throws IOException {
 		if(!new File(PROCESSING_DIR, svsImageName).exists()) {
 			log.warn("Attempted to convert image that doesn't exist: " + svsImageName);
-			return -1;
+			return;
 		}
 		
 		String withoutExt = FilenameUtils.getBaseName(svsImageName);
 		File dir = new File(GlobalProperties.getInternalSlideImagesRoot());
 		String from = PROCESSING_DIR.getName() + File.separator + svsImageName;
 		String to = CONVERTED_DIR.getName() + File.separator + withoutExt;
+		final File expectedResult = new File(dir, to + ".dzi");
 		
 		if(!CONVERTED_DIR.exists()) {
 			log.info("Creating directory " + CONVERTED_DIR.getAbsolutePath());
@@ -85,8 +90,12 @@ public class PyramidImageProcessor {
 				try {
 					p.waitFor();
 					long timeTaken = System.currentTimeMillis() - startTime;
-					log.info(String.format("Command \"%s\" completed in %.1f s", command, timeTaken / 1000.0));
-					convertTime.register(timeTaken, svsFile.length());
+					if(expectedResult.exists()) {
+						log.info(String.format("Command \"%s\" completed in %.1f s", command, timeTaken / 1000.0));
+						convertTime.register(timeTaken, svsFile.length());
+					} else {
+						log.warn(String.format("Command \"%s\" did not complete successfully.", command));
+					}
 					log.debug("Deleting " + svsFile.getName());
 					svsFile.delete();
 				} catch (InterruptedException e) {
@@ -94,8 +103,6 @@ public class PyramidImageProcessor {
 				}
 			}
 		}).start();
-			
-		return convertTime.guessTime(svsFile.length());
 	}
 
 	private static class TimeApproximator {
