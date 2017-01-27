@@ -106,7 +106,7 @@ public class AdminView extends HttpServlet {
      * 		<li>"app_name:studyId" -> "Access to study: studyId"</li>
      * 		</ul>
      * 
-     * @param authority of the text to translate
+     * @param authority the text to translate
      * @return human-readable version of the authority
      */
     protected static String translateAuthority(String authority) {

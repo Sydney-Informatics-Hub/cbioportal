@@ -76,10 +76,11 @@
 	}
 	
 	$(function() {
-		console.log($("#lookupStudyId option").length);
 		if($("#lookupStudyId option").length == 1) {
 			$("#lookupStudyId").val($("#lookupStudyId option:first").val());
 			$("#lookupStudyId").trigger('liszt:updated').trigger("change");
 		}
 	});
+	
+	
 </script>
