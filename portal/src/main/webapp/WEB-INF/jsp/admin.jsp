@@ -529,8 +529,13 @@
 		$("#uploadStudy").toggleClass("required", $opt.is(".req-study"));
 		$("#uploadPatient").toggleClass("required", $opt.is(".req-patient"));
 		$("#uploadSample").toggleClass("required", $opt.is(".req-sample"));
-		if($("uploadPatient").is(".required") && $("#uploadStudy").val()) {
-			loadPatients();
+	});
+	
+	$("#uploadStudy").on("change",function() {
+		if($("#uploadStudy").val()) {
+			if($("#uploadPatient").is(".required")) {
+				loadPatients();
+			}
 		}
 	});
 	
