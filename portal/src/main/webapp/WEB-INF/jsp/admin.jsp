@@ -288,7 +288,6 @@
 	
 	$("#addUser").hide();
 	$("button.add-user").on("click", function() {
-		var row = $(this).closest("tr");
 		$(this).hide();
 		$("#addUser").show();
 	});
@@ -308,7 +307,7 @@
 				$("#userTable").DataTable().row.add(newRow).draw();
 				$("#addAuthEmail").append($("<option/>", {value: user.email, text: user.name}));
 				sortLists($("#addAuthEmail,#addAuthStudy"));
-				newRow.effect("highlight", {color: '#00FF33'});
+				newRow.effect("highlight");
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
@@ -347,7 +346,7 @@
 					.append($("<td/>", {class: "authority", text: user.display, "data-auth": user.authority}))
 					.append(actionCell);
 				$("#authoritiesTable").DataTable().row.add(newRow).draw();
-				newRow.effect("highlight", {color: '#00FF33'});
+				newRow.effect("highlight");
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
