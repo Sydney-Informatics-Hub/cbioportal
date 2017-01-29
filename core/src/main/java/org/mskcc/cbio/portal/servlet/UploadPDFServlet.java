@@ -66,28 +66,28 @@ public class UploadPDFServlet extends HttpServlet {
 					String value = item.getString();
 					switch(item.getFieldName()) {
 					case "type":
-						if(value == null) {
+						if(value.isEmpty()) {
 							returnWithError(request, response, "Please choose an upload type.");
 							return;
 						}
 						type = PdfUploadType.valueOf(value);
 						break;
 					case "studyId":
-						if(value == null && type.isNeedsStudy()) {
+						if(value.isEmpty() && type.isNeedsStudy()) {
 							returnWithError(request, response, "Please choose a cancer study.");
 							return;
 						}
 						studyId = value;
 						break;
 					case "patientId":
-						if(value == null && type.isNeedsPatient()) {
+						if(value.isEmpty() && type.isNeedsPatient()) {
 							returnWithError(request, response, "Please choose a patient.");
 							return;
 						}
 						patientId = value;
 						break;
 					case "sampleId":
-						if(value == null && type.isNeedsSample()) {
+						if(value.isEmpty() && type.isNeedsSample()) {
 							returnWithError(request, response, "Please choose a sample.");
 							return;
 						}
