@@ -435,15 +435,17 @@
 	
 	function loadPatients(preChosenPatient, then) {
 		var studyId = $("#uploadStudy").val();
-		updateUploadForm(
-				$("#uploadPatient"), 
-				$(".needs-study"), 
-				$(".needs-study:not(.needs-patient)"), 
-				"api/patients", 
-				{"study_id": studyId},
-				preChosenPatient,
-				then
-		);
+		if(studyId) {
+			updateUploadForm(
+					$("#uploadPatient"), 
+					$(".needs-study"), 
+					$(".needs-study:not(.needs-patient)"), 
+					"api/patients", 
+					{"study_id": studyId},
+					preChosenPatient,
+					then
+			);
+		}
 	}
 	$("#uploadStudy").on("change", function() {
 		if($("#uploadPatient").is(".required")) {
@@ -567,9 +569,7 @@
 		$("#uploadStudy").toggleClass("required", $opt.is(".req-study"));
 		$("#uploadPatient").toggleClass("required", $opt.is(".req-patient"));
 		$("#uploadSample").toggleClass("required", $opt.is(".req-sample"));
-		if($("uploadPatient").is(".required") && $("#uploadStudy").val()) {
-			loadPatients();
-		}
+		$("#uploadStudy").trigger("change");
 	});
 	
 	$("select").on("change", function() {
