@@ -344,6 +344,7 @@
 				$("#addAuthEmail").append($("<option/>", {value: user.email, text: user.name}));
 				sortLists($("#addAuthEmail,#addAuthStudy"));
 				newRow.effect("highlight");
+				$("#addUser form").trigger("reset");
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
