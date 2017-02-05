@@ -88,7 +88,9 @@ public class QueryBuilder extends HttpServlet {
     public static final String TAB_INDEX = "tab_index";
     public static final String TAB_DOWNLOAD = "tab_download";
     public static final String TAB_VISUALIZE = "tab_visualize";
-    public static final String TAB_LOOKUP = "tab_lookup";
+    public static final String TAB_LOOKUP = "tab_lookup"; 
+    public static final String LOOKUP_PATIENT_ID = "lookupPatientId";
+    public static final String LOOKUP_STUDY_ID = "lookupStudyId";
     public static final String USER_ERROR_MESSAGE = "user_error_message";
     public static final String ATTRIBUTE_URL_BEFORE_FORWARDING = "ATTRIBUTE_URL_BEFORE_FORWARDING";
     public static final String Z_SCORE_THRESHOLD = "Z_SCORE_THRESHOLD";
@@ -170,24 +172,6 @@ public class QueryBuilder extends HttpServlet {
         //  Get User Selected Action
         String action = httpServletRequest.getParameter(ACTION_NAME);
         String tabIndex = httpServletRequest.getParameter(TAB_INDEX);
-        // Check if submitting our form
-        if (ACTION_SUBMIT.equals(action) && TAB_LOOKUP.equals(tabIndex)) {
-        	// Check if our form is valid
-        	String patientId = (String) httpServletRequest.getParameter("lookupPatientId");
-        	String studyId = (String) httpServletRequest.getParameter("lookupStudyId");
-        	boolean isValid = validateLookupForm(studyId, patientId);
-        	if (isValid) {
-        		String url = String.format("case.do?cancer_study_id=%s&case_id=%s", studyId, patientId);
-        		httpServletResponse.sendRedirect(url);
-        	} else {
-				httpServletRequest.setAttribute(QueryBuilder.USER_ERROR_MESSAGE, 
-						"Invalid study or patient. Please check the form below.");
-				RequestDispatcher dispatcher = getServletContext()
-						.getRequestDispatcher("/WEB-INF/jsp/index.jsp");
-				dispatcher.forward(httpServletRequest, httpServletResponse);
-        	}
-        	return;
-        }
         
         String patientCaseSelect = httpServletRequest.getParameter(PATIENT_CASE_SELECT);
 
@@ -223,6 +207,25 @@ public class QueryBuilder extends HttpServlet {
             	}
             }
             httpServletRequest.setAttribute(AVAILABLE_CANCER_STUDIES, myCancerStudies);
+            
+            // Check if submitting patient lookup form
+            if (ACTION_SUBMIT.equals(action) && TAB_LOOKUP.equals(tabIndex)) {
+            	// Check if the patient lookup form is valid
+            	String patientId = (String) httpServletRequest.getParameter(LOOKUP_PATIENT_ID);
+            	String studyId = (String) httpServletRequest.getParameter(LOOKUP_STUDY_ID);
+            	boolean isValid = validateLookupForm(studyId, patientId);
+            	if (isValid) {
+            		String url = String.format("case.do?cancer_study_id=%s&case_id=%s", studyId, patientId);
+            		httpServletResponse.sendRedirect(url);
+            	} else {
+    				httpServletRequest.setAttribute(QueryBuilder.USER_ERROR_MESSAGE, 
+    						"Invalid study or patient. Please check the form below.");
+    				RequestDispatcher dispatcher = getServletContext()
+    						.getRequestDispatcher("/WEB-INF/jsp/index.jsp");
+    				dispatcher.forward(httpServletRequest, httpServletResponse);
+            	}
+            	return;
+            }
             
             //  Get Genetic Profiles for Selected Cancer Type
             ArrayList<GeneticProfile> profileList = GetGeneticProfiles.getGeneticProfiles
