@@ -53,6 +53,8 @@
     path={{ internal_path_report_root }}
     state=directory
     mode=0755
+    owner=tomcat
+    group=tomcat
   become: yes
   when: internal_path_report_root is defined and internal_path_report_root != "" and internal_path_report_root != None
 
@@ -61,6 +63,8 @@
     path={{ internal_ca125_plot_root }}
     state=directory
     mode=0755
+    owner=tomcat
+    group=tomcat
   become: yes
   when: internal_ca125_plot_root is defined and internal_ca125_plot_root != "" and internal_ca125_plot_root != None
 
@@ -69,6 +73,8 @@
     path={{ internal_molecular_testing_report_root }}
     state=directory
     mode=0755
+    owner=tomcat
+    group=tomcat
   become: yes
   when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
 
