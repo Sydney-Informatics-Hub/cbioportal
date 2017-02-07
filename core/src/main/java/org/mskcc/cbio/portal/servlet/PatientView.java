@@ -60,6 +60,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.*;
+import org.mskcc.cbio.portal.tool.PyramidImageProcessor;
 import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.web_api.ConnectionManager;
 import org.mskcc.cbio.portal.web_api.ProtocolException;
@@ -107,6 +108,7 @@ public class PatientView extends HttpServlet {
     public static final String CLINICAL_DATA = "clinical_data";
     public static final String CLINICAL_ATTRIBUTES = "clinical_attributes";
     public static final String TISSUE_IMAGES = "tissue_images";
+    public static final String LOCAL_TISSUE_IMAGES = "local_tissue_images";
     public static final String PATH_REPORT_URL = "path_report_url";
     public static final String MOLECULAR_TESTING_REPORT_URL = "molecular_testing_report_url";
     public static final String CA125_PLOT_URL = "ca125_plot_url";
@@ -487,6 +489,11 @@ public class PatientView extends HttpServlet {
             request.setAttribute(TISSUE_IMAGES, tisImageUrl);
         }
         
+        String[] localImagesPath = getLocalTissueImagePaths(cancerStudy.getCancerStudyStableId(), patientId, samples.size()>1?null:sampleId);
+        if(localImagesPath != null) {
+        	request.setAttribute(LOCAL_TISSUE_IMAGES, localImagesPath);
+        }
+        
         setCA125PlotURL(cancerStudy, patientId, request);
         setMolecularTestingReportUrl(cancerStudy, patientId, samples, isPatientView, request);
         
@@ -602,6 +609,25 @@ public class PatientView extends HttpServlet {
         }
         
         return null;
+    }
+    
+    private String[] getLocalTissueImagePaths(String cancerStudyId, String patientId, String sampleId) {
+    	File f = PyramidImageProcessor.CONVERTED_DIR;
+    	final String start = cancerStudyId + "." + patientId + (sampleId == null ? "" : ("." + sampleId));
+    	File[] images = f.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return pathname.isFile() && pathname.getName().startsWith(start);
+			}
+		});
+    	if(images != null && images.length > 0) {
+    		String[] toReturn = new String[images.length];
+    		for(int i = 0; i < images.length; i++) {
+    			toReturn[i] = images[i].getName();
+    		}
+    		return toReturn;
+    	}
+    	return null;
     }
     
     // Map<TypeOfCancer, Map<CaseId, List<ImageName>>>

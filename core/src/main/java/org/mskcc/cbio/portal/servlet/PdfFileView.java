@@ -57,6 +57,7 @@ public abstract class PdfFileView  extends HttpServlet {
     private static final String ERROR_MSG = "error_msg";
     protected AccessControl accessControl; // class which process access control to cancer studies
     String DATA_DIRECTORY = null; // Data directory needs to be set in concrete extending classes
+    protected boolean logServes;
 
     /**
      * Initializes the servlet.
@@ -67,6 +68,7 @@ public abstract class PdfFileView  extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         accessControl = SpringUtil.getAccessControl();
+        logServes = true;
     }
 
     /**
@@ -109,7 +111,9 @@ public abstract class PdfFileView  extends HttpServlet {
     abstract boolean validRequest(HttpServletRequest request) throws IOException, DaoException;
 
     private void serveFile(HttpServletResponse response, File file) throws IOException{
-        logger.info("PdfFileView.serveFile(): Serving file: " + file.getPath());
+        if(logServes) {
+        	logger.info("PdfFileView.serveFile(): Serving file: " + file.getPath());
+        }
         response.setHeader("Content-Type", getServletContext().getMimeType(file.getName()));
         response.setHeader("Content-Length", String.valueOf(file.length()));
         response.setHeader("Content-Disposition", "inline; filename=\"" + file.getName() + "\"");

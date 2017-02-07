@@ -75,6 +75,9 @@ String jsonClinicalData = jsonMapper.writeValueAsString((Map<String,String>)requ
 String tissueImageUrl = (String)request.getAttribute(PatientView.TISSUE_IMAGES);
 boolean showTissueImages = tissueImageUrl!=null;
 
+String[] localTissueImagePaths = (String[])request.getAttribute(PatientView.LOCAL_TISSUE_IMAGES);
+boolean showLocalTissueImages = localTissueImagePaths != null;
+
 String patientID = (String)request.getAttribute(PatientView.PATIENT_ID);
 int numTumors = (Integer)request.getAttribute("num_tumors");
 
@@ -203,6 +206,10 @@ if (patientViewError!=null) {
     <li><a id="link-tissue-images" href='#tab_images' class='patient-tab'>Tissue Images</a></li>
     <%}%>
 
+    <%if(showLocalTissueImages){%>
+    <li><a id="link-local-tissue-images" href='#tab_local_images' class='patient-tab'>Uploaded Tissue Images</a></li>
+    <%}%>
+
     <%if(pathReportUrl!=null){%>
     <li><a id="link-path-report" href='#tab_path-report' class='patient-tab'>Pathology Report</a></li>
     <%}%>
@@ -248,6 +255,12 @@ if (patientViewError!=null) {
     <%if(showTissueImages){%>
     <div class="patient-section" id="tab_images">
         <%@ include file="tissue_images.jsp" %>
+    </div>
+    <%}%>
+
+    <%if(showLocalTissueImages){%>
+    <div class="patient-section" id="tab_local_images">
+        <%@ include file="local_tissue_images.jsp" %>
     </div>
     <%}%>
 

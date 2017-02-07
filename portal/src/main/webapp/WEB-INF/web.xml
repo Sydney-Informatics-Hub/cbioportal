@@ -465,6 +465,15 @@
         <servlet-name>ca125_plot_view</servlet-name>
         <url-pattern>/ca125_plot/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>local_slide_image_view</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.LocalSlideView</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>local_slide_image_view</servlet-name>
+        <url-pattern>/slide_image/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>DrugsJSON</servlet-name>
