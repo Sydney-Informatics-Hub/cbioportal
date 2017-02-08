@@ -78,6 +78,16 @@
   become: yes
   when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
 
+- name: Create the internal slide image root directory if it doesn't exist
+  file: >
+    path={{ internal_slide_images_root }}
+    state=directory
+    mode=0755
+    owner=tomcat
+    group=tomcat
+  become: yes
+  when: internal_slide_images_root is defined and internal_slide_images_root != "" and internal_slide_images_root != None
+
 - name: Copy the example global confirguration properties file
   copy: >
     src={{ cbioportal_root }}/src/main/resources/portal.properties.EXAMPLE
