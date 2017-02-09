@@ -61,7 +61,6 @@ public class ModifyAdmin extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setHeader("Cache-Control", "no-cache");
-
         if(!request.isUserInRole("ROLE_ADMIN")) {
         	response.getWriter().write("Not authorised");
         	return;

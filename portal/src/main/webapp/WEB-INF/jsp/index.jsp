@@ -46,7 +46,7 @@
     }
     String tabIndex = request.getParameter(QueryBuilder.TAB_INDEX);
     if (tabIndex == null) {
-        tabIndex = QueryBuilder.TAB_VISUALIZE;
+        tabIndex = QueryBuilder.TAB_LOOKUP;
     } else {
         tabIndex = URLEncoder.encode(tabIndex);
     }
@@ -152,10 +152,16 @@ if (dbError != null && userMessage != null) {  %>
 
             <%
                 //  Outputs Query and Download Tabs
-                if (tabIndex.equals(QueryBuilder.TAB_VISUALIZE)) {
+                if (tabIndex.equals(QueryBuilder.TAB_LOOKUP)) {
+                    out.println ("<span class='tab_active'>Patient Lookup</span>");
+                    out.println ("<span class='tab_inactive'><a id='query_tab' href=''>Query</a></span></span>");
+                    out.println ("<span class='tab_inactive'><a id='download_tab' href=''>Download Data</a></span>");
+                } else if (tabIndex.equals(QueryBuilder.TAB_VISUALIZE)) {
+                    out.println ("<span class='tab_inactive'><a id='lookup_tab' href=''>Patient Lookup</a></span>");
                     out.println ("<span class='tab_active'>Query</span>");
                     out.println ("<span class='tab_inactive'><a id='download_tab' href=''>Download Data</a></span>");
                 } else {
+                    out.println ("<span class='tab_inactive'><a id='lookup_tab' href=''>Patient Lookup</a></span>");
                     out.println ("<span class='tab_inactive'><a id='query_tab' href=''>Query</a></span></span>");
                     out.println ("<span class='tab_active'>Download Data</span>");
                 }

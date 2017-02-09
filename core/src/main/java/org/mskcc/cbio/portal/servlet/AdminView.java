@@ -84,7 +84,7 @@ public class AdminView extends HttpServlet {
      * Generate a dictionary of authorities to human-readable text.
      *  
      * @param userAuthorities the list of authorities to translate
-     * @return a dictionary with user authorities as the keys, and translated authroity text as the values
+     * @return a dictionary with user authorities as the keys, and translated authority text as the values
      * @see #translateAuthority(String)
      */
     protected static Map<String, String> translateAuthoritiesToDisplay(List<UserAuthorities> userAuthorities) {

@@ -77,7 +77,7 @@ public class PortalUserJDBCDAO implements PortalUserDAO {
 
 
 	/**
-	 * Implementaiton of {@code PortalUserDAO}
+	 * Implementation of {@code PortalUserDAO}
 	 */
 	public User getPortalUser(final String username) {
 
