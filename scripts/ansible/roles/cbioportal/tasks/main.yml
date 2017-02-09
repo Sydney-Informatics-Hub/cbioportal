@@ -122,6 +122,13 @@
     line='patient_view.internal_molecular_testing_report_root={{ internal_molecular_testing_report_root }}'
   when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
 
+- name: Update the portal properties with the internal slide images root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_slide_images_root='
+    line='patient_view.internal_slide_images_root={{ internal_slide_images_root }}'
+  when: internal_slide_images_root is defined and internal_slide_images_root != "" and internal_slide_images_root  != None
+
 - name: Update the portal properties with the service login initiation url
   lineinfile: > 
     dest={{ cbioportal_root }}/src/main/resources/portal.properties
