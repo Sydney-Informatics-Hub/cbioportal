@@ -2,6 +2,7 @@ package org.mskcc.cbio.portal.servlet;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -60,7 +61,6 @@ public class ModifyAdmin extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setHeader("Cache-Control", "no-cache");
-
         if(!request.isUserInRole("ROLE_ADMIN")) {
         	response.getWriter().write("Not authorised");
         	return;
@@ -244,7 +244,14 @@ public class ModifyAdmin extends HttpServlet {
 			}
 		}
 		UserAuthorities auth = new UserAuthorities(email, Arrays.asList(authority));
-		userDAO.addPortalUserAuthorities(auth);
+		Collection<String> allUserAuthorities = userDAO.getPortalUserAuthorities(email).getAuthorities();
+		if (allUserAuthorities.contains(authority)) {
+			error(response, "User with that email and authority already exists.");
+			return;
+		} else {
+			userDAO.addPortalUserAuthorities(auth);
+
+		}
 		JSONObject result = new JSONObject();
 		result.put("email", email);
 		result.put("authority", authority);

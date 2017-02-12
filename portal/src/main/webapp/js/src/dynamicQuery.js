@@ -63,7 +63,6 @@ if(typeof(console) === "undefined" || typeof(console.log) === "undefined")
 
 //  Triggered only when document is ready.
 $(document).ready(function(){
-	
      //  Load Portal JSON Meta Data while showing loader image in place of query form
      loadMetaData();
 
@@ -106,6 +105,10 @@ $(document).ready(function(){
     $("#download_tab").click(function(event) {
        event.preventDefault();
        userClickedMainTab("tab_download");
+    });
+    $("#lookup_tab").click(function(event) {
+    	event.preventDefault();
+    	userClickedMainTab("tab_lookup");
     });
     
     $("#gene_list").on('input', function(event) {
@@ -170,6 +173,7 @@ function loadGeneList(geneSetId) {
 	
 //  Load Portal JSON Meta Data, while showing loader image
 function loadMetaData() {
+	
     $('#load').remove();
     //  show ajax loader image; loader is background image of div 'load' as set in css
     $('.main_query_panel').append('<div id="load">&nbsp;</div>');
@@ -179,24 +183,28 @@ function loadMetaData() {
     $('#main_query_form').hide('fast',loadContent);
 
     function loadContent() {
+    	if(window.tab_index == 'tab_lookup') {
+    		showNewContent();
+    		return;
+    	}
+    	
         //  Get Portal JSON Meta Data via JQuery AJAX
-	window.metaDataPromise = $.Deferred();
-
-        jQuery.getJSON("portal_meta_data.json?partial_studies=true&partial_genesets=true",function(json){
-            //  Store JSON Data in global variable for later use
-            window.metaDataJson = json;
-	    window.metaDataPromise.resolve(json);
-
-            // Load data of selected study right at the outset before continuing
-            $.getJSON("portal_meta_data.json?study_id="+window.cancer_study_id_selected, function(json) {
-                console.log("Loading metadata for "+window.cancer_study_id_selected);
-                // this code should be about the same as in loadStudyMetaData
-                window.metaDataJson.cancer_studies[window.cancer_study_id_selected] = json;
-                //  Add Meta Data to current page
-                addMetaDataToPage();
-                showNewContent();
-            });
-        });
+		window.metaDataPromise = $.Deferred();
+	    jQuery.getJSON("portal_meta_data.json?partial_studies=true&partial_genesets=true",function(json){
+	        //  Store JSON Data in global variable for later use
+	        window.metaDataJson = json;
+	        window.metaDataPromise.resolve(json);
+	
+	        // Load data of selected study right at the outset before continuing
+	        $.getJSON("portal_meta_data.json?study_id="+window.cancer_study_id_selected, function(json) {
+	            console.log("Loading metadata for "+window.cancer_study_id_selected);
+	            // this code should be about the same as in loadStudyMetaData
+	            window.metaDataJson.cancer_studies[window.cancer_study_id_selected] = json;
+	            //  Add Meta Data to current page
+	            addMetaDataToPage();
+	            showNewContent();
+	        });
+	    });
     }
 
     function showNewContent() {
@@ -365,7 +373,7 @@ function getMapping() {
 function chooseAction(evt) {
     $(".error_box").remove();
        var haveExpInQuery = false;
-       if (!window.changingTabs) {
+       if (!window.changingTabs && window.tab_index != 'tab_lookup') {
 		// validate OQL
 		try {
 			var parsed_result = oql_parser.parse($('#gene_list').val());
@@ -395,6 +403,8 @@ function chooseAction(evt) {
 			return false;
 		}
        }
+       
+       if(window.tab_index != 'tab_lookup'){
     var selected_studies = $("#jstree").jstree(true).get_selected_leaves();
     if (selected_studies.length === 0 && !window.changingTabs) {
             // select all by default
@@ -436,7 +446,7 @@ function chooseAction(evt) {
             }
         }
     }
-
+       }
 }
 
 function createAnError(errorText, targetElt, optClassStr) {
