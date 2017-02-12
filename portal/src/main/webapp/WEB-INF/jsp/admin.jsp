@@ -159,6 +159,10 @@
 			<div style="padding:0.5em; margin-bottom:1em;" class="ui-state-highlight ui-corner-all">
 	            <span class="ui-icon ui-icon-info" style="float:left; margin-right:0.3em;"></span>
 	            <c:out value="${uploadMessage}" />
+	            <c:if test="${not empty uploadSubMessage}">
+	            	<br/>
+	            	<span class="subMessage"><c:out value="${uploadSubMessage}" /></span>
+	            </c:if>
 			</div>
 			<c:remove var="uploadMessage" scope="session"/>
 		</c:if>
@@ -205,6 +209,15 @@
 					<select name='sampleId' id='uploadSample'>
 					</select>
 				</div>
+				<div id='progress' class='form-group'>
+					<div id='barContainer'>
+						<div class='bar-part' id='progressBar'></div>
+						<div class='bar-part' id='progressBarBack'></div>
+						<div class='bar-part' id='progressPercent'></div>
+					</div>
+					<div id='progressNote'></div>
+				</div>
+				<script>$("#progress").hide();</script>
 				<div class='form-group'>
 					<button type='submit'>Submit</button>
 				</div>
@@ -552,7 +565,40 @@
 			e.preventDefault();
 			return false;
 		}
+		$("button[type='submit']").hide();
+		$("#progress").show();
+		$("#progressNote").text("Uploading: 0%");
+		setTimeout(queryProgress, 500);
 	});
+	
+	function queryProgress() {
+		$.ajax("admin/upload/progress", {
+			type: "GET",
+			dataType: "json",
+			success: updateProgress,
+			error: function(obj, status, text) {
+				updateProgress();
+				console.log(obj,status,text);
+			}
+		});
+	}
+	
+	function updateProgress(response) {
+		if(response) {
+			if(response.uploading) {
+				$("#progressBar").animate({"width":response.percent+"%"}, 200);
+				$("#progressPercent").text("Uploading: " + response.percent + "%");
+				$("#progressNote").text(response.uploaded + " of " + response.totalSize + " uploaded");
+				setTimeout(queryProgress, 500);
+			} else {
+				$("#progressBar").animate({"width":"100%"}, 200);
+				$("#progressNote").text("Processing...");
+				$("#progressPercent").text("");
+			}
+		} else {
+			$("#progress").hide();
+		}
+	}
 	
 	$("#uploadFile").on("change", function() {
 		var filename = $(this).val().split('\\').pop();
@@ -623,6 +669,42 @@
     label {
     	font-weight: normal;
     }
+    .subMessage {
+    	font-size: small;
+    	font-style: italic;
+    }
+    #barContainer {
+    	width: 400px;
+    	height: 20px;
+    	position: relative;
+    }
+    .bar-part {
+    	height: 20px;
+    	position: absolute;
+    }
+    #progressBar {
+    	width: 0%;
+    	background-color: #1974b8;
+    }
+  	#progressBarBack {
+  		width: 100%;
+    	background-color: none;
+    	border: 1px solid black;
+  	}
+  	#progressPercent {
+  		width: 100%;
+  		font-size: 11px;
+  		text-align: center;
+  		padding-top: 2px;
+  		font-weight: bold;
+  		
+  	}
+  	#progressNote {
+    	width: 400px;
+  		text-align: center;
+  		font-size: 13px;
+  		margin-top: 5px;
+  	}
 </style>
 
 </body>

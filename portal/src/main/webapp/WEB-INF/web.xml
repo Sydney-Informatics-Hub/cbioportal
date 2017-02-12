@@ -465,6 +465,15 @@
         <servlet-name>ca125_plot_view</servlet-name>
         <url-pattern>/ca125_plot/*</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>local_slide_image_view</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.LocalSlideView</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>local_slide_image_view</servlet-name>
+        <url-pattern>/slide_image/*</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>DrugsJSON</servlet-name>
@@ -602,6 +611,14 @@
     <servlet-mapping>
         <servlet-name>admin_upload</servlet-name>
         <url-pattern>/admin/upload</url-pattern>
+    </servlet-mapping>
+	<servlet>
+        <servlet-name>admin_upload_progress</servlet-name>
+        <servlet-class>org.mskcc.cbio.portal.servlet.FileUploadProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>admin_upload_progress</servlet-name>
+        <url-pattern>/admin/upload/progress</url-pattern>
     </servlet-mapping>
 	<servlet>
         <servlet-name>admin_modify</servlet-name>

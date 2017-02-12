@@ -18,7 +18,7 @@ import org.mskcc.cbio.portal.model.CancerStudy;
 import org.mskcc.cbio.portal.model.UserAuthorities;
 import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
-import org.mskcc.cbio.portal.util.PdfUploadType;
+import org.mskcc.cbio.portal.util.FileUploadType;
 import org.mskcc.cbio.portal.util.XDebug;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
@@ -73,7 +73,7 @@ public class AdminView extends HttpServlet {
     	studyMap.put("all", "All Cancer Studies");
     	request.setAttribute("studies", studyMap);
     	
-    	request.setAttribute("uploadTypes", PdfUploadType.values());
+    	request.setAttribute("uploadTypes", FileUploadType.values());
         
         RequestDispatcher dispatcher =
                 getServletContext().getRequestDispatcher("/WEB-INF/jsp/admin.jsp");
