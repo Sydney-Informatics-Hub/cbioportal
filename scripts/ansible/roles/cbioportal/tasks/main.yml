@@ -53,6 +53,8 @@
     path={{ internal_path_report_root }}
     state=directory
     mode=0755
+    owner=tomcat
+    group=tomcat
   become: yes
   when: internal_path_report_root is defined and internal_path_report_root != "" and internal_path_report_root != None
 
@@ -61,6 +63,8 @@
     path={{ internal_ca125_plot_root }}
     state=directory
     mode=0755
+    owner=tomcat
+    group=tomcat
   become: yes
   when: internal_ca125_plot_root is defined and internal_ca125_plot_root != "" and internal_ca125_plot_root != None
 
@@ -69,8 +73,20 @@
     path={{ internal_molecular_testing_report_root }}
     state=directory
     mode=0755
+    owner=tomcat
+    group=tomcat
   become: yes
   when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
+
+- name: Create the internal slide image root directory if it doesn't exist
+  file: >
+    path={{ internal_slide_images_root }}
+    state=directory
+    mode=0755
+    owner=tomcat
+    group=tomcat
+  become: yes
+  when: internal_slide_images_root is defined and internal_slide_images_root != "" and internal_slide_images_root != None
 
 - name: Copy the example global confirguration properties file
   copy: >
@@ -105,6 +121,13 @@
     regexp='^patient_view.internal_molecular_testing_report_root='
     line='patient_view.internal_molecular_testing_report_root={{ internal_molecular_testing_report_root }}'
   when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
+
+- name: Update the portal properties with the internal slide images root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_slide_images_root='
+    line='patient_view.internal_slide_images_root={{ internal_slide_images_root }}'
+  when: internal_slide_images_root is defined and internal_slide_images_root != "" and internal_slide_images_root  != None
 
 - name: Update the portal properties with the service login initiation url
   lineinfile: > 
