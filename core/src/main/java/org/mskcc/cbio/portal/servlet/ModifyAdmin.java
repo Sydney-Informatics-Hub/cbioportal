@@ -243,15 +243,21 @@ public class ModifyAdmin extends HttpServlet {
 				authority = GlobalProperties.getAppName() + ":" + authority;
 			}
 		}
+		
 		UserAuthorities auth = new UserAuthorities(email, Arrays.asList(authority));
-		Collection<String> allUserAuthorities = userDAO.getPortalUserAuthorities(email).getAuthorities();
-		if (allUserAuthorities.contains(authority)) {
-			error(response, "User with that email and authority already exists.");
-			return;
-		} else {
-			userDAO.addPortalUserAuthorities(auth);
-
+		
+		// Ensure the authority doesn't already exist
+		UserAuthorities existing = userDAO.getPortalUserAuthorities(email);
+		if(existing != null) {
+			Collection<String> allUserAuthorities = existing.getAuthorities();
+			if (allUserAuthorities.contains(authority)) {
+				error(response, "User with that email and authority already exists.");
+				return;
+			}
 		}
+		
+		userDAO.addPortalUserAuthorities(auth);
+
 		JSONObject result = new JSONObject();
 		result.put("email", email);
 		result.put("authority", authority);
