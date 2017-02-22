@@ -57,6 +57,9 @@
 			if(response.length > 1) {
 				$select.append($("<option/>"));
 			}
+			response.sort(function(a, b) {
+				return (a.id > b.id) - (b.id > a.id)
+			});
 			$.each(response, function(i, patient) {
 				$select.append($("<option/>", {
 					value: patient.id,
