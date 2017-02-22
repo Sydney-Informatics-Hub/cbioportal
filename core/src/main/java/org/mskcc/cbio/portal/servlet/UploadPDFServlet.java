@@ -2,6 +2,7 @@ package org.mskcc.cbio.portal.servlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -16,6 +17,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.ProgressListener;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.mskcc.cbio.portal.tool.PyramidImageProcessor;
 import org.mskcc.cbio.portal.util.GlobalProperties;
@@ -123,7 +125,8 @@ public class UploadPDFServlet extends HttpServlet {
     
     private void doSaveFile(UploadFileForm form, HttpServletRequest request, HttpServletResponse response) throws IOException {
     	String baseFilename = getBaseFilename(form.getType());
-    	String filename = form.getType().getFilename(form.getStudyId(), form.getPatientId(), form.getSampleId());
+    	String extension = "." + FilenameUtils.getExtension(form.getFile().getName());
+    	String filename = form.getType().getFilename(form.getStudyId(), form.getPatientId(), form.getSampleId(), extension);
     	File fullFile = new File(baseFilename, filename);
         try {
 			form.getFile().write(fullFile);
@@ -149,7 +152,8 @@ public class UploadPDFServlet extends HttpServlet {
     }
     
     private void doSaveAndConvertFile(final UploadFileForm form, HttpServletRequest request, HttpServletResponse response) throws IOException {
-    	final String filename = form.getType().getNextAvailableFilename(PyramidImageProcessor.CONVERTED_DIR, form.getStudyId(), form.getPatientId(), form.getSampleId());
+    	String extension = "." + FilenameUtils.getExtension(form.getFile().getName());
+    	final String filename = form.getType().getNextAvailableFilename(PyramidImageProcessor.CONVERTED_DIR, form.getStudyId(), form.getPatientId(), form.getSampleId(), extension);
     	long expected = PyramidImageProcessor.getConvertTime(form.getFile().getSize());
     	new Thread(new Runnable() {
 			@Override
@@ -227,10 +231,10 @@ public class UploadPDFServlet extends HttpServlet {
 	        	error = "Please choose a file to upload.";
 	        	return;
 	        }
-	        if(!file.getName().toLowerCase().endsWith(type.getFileExtension())) {
-	        	error = "Please choose a " + type.getFileExtension() + " file.";
+			if(!type.isValidFilename(file.getName())) {
+				error = "Please choose a file with a valid extension: " + Arrays.toString(type.getFileExtensions());
 	        	return;
-	        }
+			}
 		}
 		private FileUploadType type;
 		private String studyId;
