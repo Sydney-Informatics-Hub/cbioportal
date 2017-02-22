@@ -235,6 +235,7 @@
 	
 	$("#userTable,#authoritiesTable").DataTable({
 		"sDom": '<"H"<"table-name">fr>t<"F"<"datatable-paging"pil>>',
+		"aaSorting": [[ 0, "asc" ], [ 1, "asc" ]],
 		"bJQueryUI": true,
         "bDestroy": true,
         "bPaginate": true,
