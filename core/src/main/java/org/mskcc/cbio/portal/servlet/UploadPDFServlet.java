@@ -3,6 +3,7 @@ package org.mskcc.cbio.portal.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -153,7 +154,8 @@ public class UploadPDFServlet extends HttpServlet {
     
     private void doSaveAndConvertFile(final UploadFileForm form, HttpServletRequest request, HttpServletResponse response) throws IOException {
     	String extension = "." + FilenameUtils.getExtension(form.getFile().getName());
-    	final String filename = form.getType().getNextAvailableFilename(PyramidImageProcessor.CONVERTED_DIR, form.getStudyId(), form.getPatientId(), form.getSampleId(), extension);
+    	Collection<File> possibleExisting = Arrays.asList(PyramidImageProcessor.CONVERTED_DIR, PyramidImageProcessor.PROCESSING_DIR);
+    	final String filename = form.getType().getNextAvailableFilename(possibleExisting, form.getStudyId(), form.getPatientId(), form.getSampleId(), extension);
     	long expected = PyramidImageProcessor.getConvertTime(form.getFile().getSize());
     	new Thread(new Runnable() {
 			@Override

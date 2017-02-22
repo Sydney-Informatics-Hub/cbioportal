@@ -3,6 +3,7 @@ package org.mskcc.cbio.portal.util;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -70,15 +71,24 @@ public enum FileUploadType {
 	}
 	
 	public String getNextAvailableFilename(File base, String studyId, String patientId, String sampleId, String extension) {
+		return getNextAvailableFilename(Arrays.asList(base), studyId, patientId, sampleId, extension);
+	}
+	public String getNextAvailableFilename(Collection<File> bases, String studyId, String patientId, String sampleId, String extension) {
 		String filename = getFilename(studyId, patientId, sampleId, extension);
 		final String baseName = FilenameUtils.getBaseName(filename);
-		File[] existing = base.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.isFile() && pathname.getName().startsWith(baseName);
+		int existing = 0;
+		for(File base : bases) {
+			File[] existingInThisBase = base.listFiles(new FileFilter() {
+				@Override
+				public boolean accept(File pathname) {
+					return pathname.isFile() && pathname.getName().startsWith(baseName);
+				}
+			});
+			if(existingInThisBase != null) {
+				existing += existingInThisBase.length;
 			}
-		});
-		return String.format("%s.%02d%s", baseName, (existing == null ? 0 : existing.length)+1, extension);
+		}
+		return String.format("%s.%02d%s", baseName, existing+1, extension);
 	}
 	
 	private String description;
