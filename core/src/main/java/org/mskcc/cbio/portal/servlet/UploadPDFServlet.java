@@ -51,7 +51,7 @@ public class UploadPDFServlet extends HttpServlet {
     	XDebug xdebug = new XDebug( request );
         request.setAttribute(QueryBuilder.XDEBUG_OBJECT, xdebug);
         
-        if(!request.isUserInRole("ROLE_ADMIN")) {
+        if(!request.isUserInRole(ModifyAdmin.ROLE_ADMIN)) {
         	forwardToErrorPage(request, response, "You do not have authorisation to do that.", xdebug);
         	return;
         }

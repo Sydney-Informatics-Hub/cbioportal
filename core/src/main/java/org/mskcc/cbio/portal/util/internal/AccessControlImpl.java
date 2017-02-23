@@ -118,13 +118,27 @@ public class AccessControlImpl implements AccessControl {
 
 		// get cancer study by stable id
 		List<CancerStudy> toReturn = new ArrayList<CancerStudy>();
-        CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableId(stableStudyId);
-		if (cancerStudy != null) {
+		
+		if(stableStudyId.equals(ALL_CANCER_STUDIES_ID)) {
+			String allCancerStudyTitle = (GlobalProperties.usersMustBeAuthorized()) ?
+					"All Authorized Cancer Studies" : "All Cancer Studies";
+			CancerStudy cancerStudy = new CancerStudy(allCancerStudyTitle, allCancerStudyTitle,
+                    "all", "all", true);
 			toReturn.add(cancerStudy);
+		} else {
+			CancerStudy cancerStudy = DaoCancerStudy.getCancerStudyByStableIdCaseInsensitive(stableStudyId);
+			if (cancerStudy != null) {
+				toReturn.add(cancerStudy);
+			}
 		}
 		
 		// outta here
 		return toReturn;
+	}
+    
+    @Override
+	public List<CancerStudy> isAccessibleCancerStudyForModification(String stableStudyId) throws DaoException {
+		return isAccessibleCancerStudy(stableStudyId);
 	}
 
     public UserDetails getUserDetails()

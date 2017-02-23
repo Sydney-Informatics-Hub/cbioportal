@@ -383,6 +383,22 @@ public final class DaoCancerStudy {
 	{
         return byStableId.get(stableId);
     }
+    
+    /**
+     * Returns the cancerStudy identified by the stable identifier 
+     * (or any case variation of it), if it exists.
+     *
+     * @param cancerStudyStableId Cancer Study Stable ID.
+     * @return the CancerStudy, or null if there's no such study.
+     */
+    public static CancerStudy getCancerStudyByStableIdCaseInsensitive(String stableId) {
+		for(String id : byStableId.keySet()) {
+			if(id.equalsIgnoreCase(stableId)) {
+				return byStableId.get(id);
+			}
+		}
+		return null;
+	}
 
     /**
      * Indicates whether the cancerStudy identified by the stable ID exists.

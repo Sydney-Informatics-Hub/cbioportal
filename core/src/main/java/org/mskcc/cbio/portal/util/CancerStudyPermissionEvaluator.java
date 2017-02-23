@@ -100,12 +100,14 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
             if (cancerStudy == null || authentication == null) {
                 return false;
             }
+            
+            boolean modifyPermission = permission.equals("modify");
 
             // Actually, it's not entirely clear why we do this null test, since the
             // authentication will always have authorities.
             Object user = authentication.getPrincipal();
             if (user != null) {
-                return hasPermission(cancerStudy, authentication);
+                return hasPermission(cancerStudy, authentication, modifyPermission);
             } else {
                 return false;
             }
@@ -125,6 +127,19 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
      * @return boolean
      */
     private boolean hasPermission(CancerStudy cancerStudy, Authentication authentication) {
+    	return hasPermission(cancerStudy, authentication, false);
+    }
+    
+    /**
+     * Helper function to determine if given user has access to given cancer study.
+     *
+     * @param cancerStudy String ID of the cancer study to check for
+     * @param user Spring Authentication of the logged-in user.
+     * @param requireSpecialAllPermission if true, checking for permission to ALL will 
+     * 	only be true if the user specifically has permission to all cancer types
+     * @return boolean
+     */
+    private boolean hasPermission(CancerStudy cancerStudy, Authentication authentication, boolean requireSpecialAllPermission) {
 
         Set<String> grantedAuthorities = getGrantedAuthorities(authentication);
 
@@ -139,7 +154,7 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
         }
 
         // a user has permission to access the 'all' cancer study (everybody does)
-        if (stableStudyID.equalsIgnoreCase(AccessControl.ALL_CANCER_STUDIES_ID)) {
+        if (!requireSpecialAllPermission && stableStudyID.equalsIgnoreCase(AccessControl.ALL_CANCER_STUDIES_ID)) {
             return true;
         }
         // if a user has access to 'all', simply return true

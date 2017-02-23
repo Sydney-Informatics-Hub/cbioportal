@@ -83,6 +83,9 @@ public interface AccessControl {
 	//@PreAuthorize("hasPermission(#stableStudyId, 'read')")
 	@PostFilter("hasPermission(filterObject, 'read')")
     List<CancerStudy> isAccessibleCancerStudy(String stableStudyId) throws DaoException;
+	
+	@PostFilter("hasPermission(filterObject, 'modify')")
+	List<CancerStudy> isAccessibleCancerStudyForModification(String stableStudyId) throws DaoException;
 
     UserDetails getUserDetails();
 }
