@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -76,7 +77,7 @@ public enum FileUploadType {
 	public String getNextAvailableFilename(Collection<File> bases, String studyId, String patientId, String sampleId, String extension) {
 		String filename = getFilename(studyId, patientId, sampleId, extension);
 		final String baseName = FilenameUtils.getBaseName(filename);
-		int existing = 0;
+		TreeSet<Integer> taken = new TreeSet<Integer>();
 		for(File base : bases) {
 			File[] existingInThisBase = base.listFiles(new FileFilter() {
 				@Override
@@ -85,10 +86,14 @@ public enum FileUploadType {
 				}
 			});
 			if(existingInThisBase != null) {
-				existing += existingInThisBase.length;
+				for(File file : existingInThisBase) {
+					String name = FilenameUtils.getBaseName(file.getName());
+					Integer num = Integer.parseInt(name.substring(name.lastIndexOf('.')));
+					taken.add(num);
+				}
 			}
 		}
-		return String.format("%s.%02d%s", baseName, existing+1, extension);
+		return String.format("%s.%02d%s", baseName, taken.last() + 1, extension);
 	}
 	
 	private String description;
