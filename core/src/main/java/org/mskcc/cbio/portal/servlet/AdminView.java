@@ -52,7 +52,7 @@ public class AdminView extends HttpServlet {
     	XDebug xdebug = new XDebug( request );
         request.setAttribute(QueryBuilder.XDEBUG_OBJECT, xdebug);
         
-        if(!request.isUserInRole("ROLE_ADMIN")) {
+        if(!request.isUserInRole(ModifyAdmin.ROLE_ADMIN)) {
         	forwardToErrorPage(request, response, "You do not have authorisation to do that.", xdebug);
         }
         
@@ -111,11 +111,10 @@ public class AdminView extends HttpServlet {
      */
     protected static String translateAuthority(String authority) {
     	String studyPrefix = "";
-    	final String ROLE_ADMIN = "ROLE_ADMIN";
     	if(GlobalProperties.filterGroupsByAppName()) {
     		studyPrefix = GlobalProperties.getAppName().toUpperCase() + ":";
     	}
-    	if(authority.equals(ROLE_ADMIN)) {
+    	if(authority.equals(ModifyAdmin.ROLE_ADMIN)) {
     		return "Administrator";
     	}
     	if(authority.toUpperCase().startsWith(studyPrefix)) {

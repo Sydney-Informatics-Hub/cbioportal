@@ -3,6 +3,7 @@ package org.mskcc.cbio.portal.servlet;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -13,10 +14,13 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
+import org.mskcc.cbio.portal.dao.DaoException;
 import org.mskcc.cbio.portal.dao.internal.PortalUserJDBCDAO;
 import org.mskcc.cbio.portal.model.User;
 import org.mskcc.cbio.portal.model.UserAuthorities;
+import org.mskcc.cbio.portal.util.AccessControl;
 import org.mskcc.cbio.portal.util.GlobalProperties;
+import org.mskcc.cbio.portal.util.SpringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.web.context.WebApplicationContext;
@@ -27,6 +31,8 @@ public class ModifyAdmin extends HttpServlet {
 	
 	@Autowired
 	private PortalUserJDBCDAO userDAO;
+	
+	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 	
 	@Override
 	public void init() throws ServletException {
@@ -61,7 +67,7 @@ public class ModifyAdmin extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setHeader("Cache-Control", "no-cache");
-        if(!request.isUserInRole("ROLE_ADMIN")) {
+        if(!request.isUserInRole(ROLE_ADMIN)) {
         	response.getWriter().write("Not authorised");
         	return;
         }
@@ -153,6 +159,29 @@ public class ModifyAdmin extends HttpServlet {
     		error(response, "Invalid username");
     		return;
     	}
+    	
+    	try {
+    		AccessControl accessControl = SpringUtil.getAccessControl();
+    		boolean allAccess = accessControl.isAccessibleCancerStudyForModification(AccessControl.ALL_CANCER_STUDIES_ID).size() == 1;
+    		if(!allAccess) {
+    			for(String authString : authorities) {
+    				if(authString.equals(ROLE_ADMIN)) {
+    					continue;
+    				}
+    				String studyId = authString;
+    				if(GlobalProperties.filterGroupsByAppName()) {
+    					studyId = authString.replaceFirst(Pattern.quote(GlobalProperties.getAppName() + ":"), "");
+    				}
+    				if(accessControl.isAccessibleCancerStudyForModification(studyId).size() != 1) {
+    					throw new IllegalAccessError();
+    				}
+    			}
+    		}
+    	} catch(DaoException | IllegalAccessError e) {
+    		error(response, "You do not have permission to modify access to that study.");
+			return;
+    	}
+    	
     	UserAuthorities auth = new UserAuthorities(username, Arrays.asList(authorities));
     	userDAO.deletePortalUserAuthorities(auth);
 		response.getWriter().write("SUCCESS");
@@ -231,13 +260,27 @@ public class ModifyAdmin extends HttpServlet {
 		boolean admin = !StringUtils.isEmpty(request.getParameter("admin"));
 		String authority = null;
 		if(admin) {
-			authority = "ROLE_ADMIN";
+			authority = ROLE_ADMIN;
 		} else {
 			String studyId = request.getParameter("studyId");
 			if(StringUtils.isEmpty(studyId)) {
 				error(response, "Please choose a cancer study.");
 				return;
 			}
+			
+			try {
+	    		AccessControl accessControl = SpringUtil.getAccessControl();
+	    		boolean allAccess = accessControl.isAccessibleCancerStudyForModification(AccessControl.ALL_CANCER_STUDIES_ID).size() == 1;
+	    		if(!allAccess) {
+    				if(accessControl.isAccessibleCancerStudyForModification(studyId).size() != 1) {
+    					throw new IllegalAccessError();
+    				}
+	    		}
+	    	} catch(DaoException | IllegalAccessError e) {
+	    		error(response, "You do not have permission to give access to that study.");
+				return;
+	    	}
+			
 			authority = studyId.toUpperCase();
 			if(GlobalProperties.filterGroupsByAppName()) {
 				authority = GlobalProperties.getAppName() + ":" + authority;

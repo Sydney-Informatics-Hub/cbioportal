@@ -444,8 +444,12 @@
 	function doAction(action, params, success, error) {
 		if(typeof error !== 'function') {
 			error = function(obj, status, text) {
-				alert(text ? text : "Unable to perform action. Please try again later.");
-				console.log("Error:", obj);
+				if(obj.status == 400) {
+					alert(obj.responseText ? obj.responseText : "Unable to perform action. Please try again later.");
+				} else {
+					alert(text ? text : "Unable to perform action. Please try again later.");
+				}
+				console.error(obj.responseText, obj);
 			}
 		}
 		$.ajax("admin/" + action, {
