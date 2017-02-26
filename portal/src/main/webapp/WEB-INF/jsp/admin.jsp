@@ -64,10 +64,10 @@
 			</tbody>
 		</table>
 		
+		<div id='userError' class='error' style='display:none'></div>
 		<div class='form'>
 			<button type='button' class='add-user'>Add User</button>
 			<div id='addUser'>
-				<div class='error' style='display:none'></div>
 				<form>
 					<div class='form-group'>
 						<label for='addUserEmail'>Email:</label>
@@ -112,11 +112,10 @@
 				</c:forEach>
 			</tbody>
 		</table>
-		
+		<div id='authorityError' class='error' style='display:none'></div>
 		<div class='form'>
 			<button type='button' class='add-authority'>Add Authority</button>
 			<div id='addAuthority'>
-				<div class='error' style='display:none'></div>
 				<form>
 					<div class='form-group'>
 						<label for='addAuthEmail'>User:</label>
@@ -325,7 +324,16 @@
 						row.effect("highlight", {color: '#FCC'}, function() {
 							$("#authoritiesTable").DataTable().row(row).remove().draw();
 						});
-					}	
+					},
+					function(obj, status, text) {
+						if(obj.status && obj.status == 400) {
+							$("#authorityError").html(obj.responseText);
+						} else {
+							$("#authorityError").html("An unknown error occurred.");
+						}
+						$("#authorityError").show();
+						console.log(obj, status, text);
+					}
 				)
 				$(this).dialog("close");	
 	        },
@@ -343,7 +351,7 @@
 	});
 	
 	$("#addUser form").on("submit", function() {
-		$("#addUser .error").hide();
+		$("#userError").hide();
 		doAction("newUser",
 			$(this).serialize(),
 			function(user) {
@@ -362,11 +370,11 @@
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
-					$("#addUser .error").html(obj.responseText);
+					$("#userError").html(obj.responseText);
 				} else {
-					$("#addUser .error").html("An unknown error occurred.");
+					$("#userError").html("An unknown error occurred.");
 				}
-				$("#addUser .error").show();
+				$("#userError").show();
 				console.log(obj, status, text);
 			}
 		);
@@ -387,7 +395,7 @@
 	});
 	
 	$("#addAuthority form").on("submit", function() {
-		$("#addAuthority .error").hide();
+		$("#authorityError").hide();
 		doAction("newAuthority",
 			$(this).serialize(),
 			function(user) {
@@ -401,11 +409,11 @@
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
-					$("#addAuthority .error").html(obj.responseText);
+					$("#authorityError").html(obj.responseText);
 				} else {
-					$("#addAuthority .error").html("An unknown error occurred.");
+					$("#authorityError").html("An unknown error occurred.");
 				}
-				$("#addAuthority .error").show();
+				$("#authorityError").show();
 				console.log(obj, status, text);
 			}
 		);
@@ -663,6 +671,9 @@
     }
     div.form {
     	margin-top: 1em;
+    }
+    div.error {
+    	margin: 1em 0;
     }
     form * {
     	box-sizing: border-box;
