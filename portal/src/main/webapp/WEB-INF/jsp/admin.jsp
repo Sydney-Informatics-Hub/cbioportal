@@ -274,7 +274,7 @@
 				doAction("deleteUser",
 					{user: user},
 					function() {
-						row.effect("highlight", {color: '#FCC'}, function() {
+						row.find("td").effect("highlight", {color: '#FCC'}, function() {
 							$("#userTable").DataTable().row(row).remove().draw();
 							$("#authoritiesTable").DataTable().rows("tr:contains(" + user + ")").remove().draw();
 							$("#addAuthEmail option[value='" + user + "']").remove();
@@ -321,7 +321,7 @@
 				doAction("deleteAuthority",
 					{user: user, authority: auth},
 					function() {
-						row.effect("highlight", {color: '#FCC'}, function() {
+						row.find("td").effect("highlight", {color: '#FCC'}, function() {
 							$("#authoritiesTable").DataTable().row(row).remove().draw();
 						});
 					},
@@ -365,7 +365,7 @@
 				$("#userTable").DataTable().row.add(newRow).draw();
 				$("#addAuthEmail").append($("<option/>", {value: user.email, text: user.name}));
 				sortLists($("#addAuthEmail,#addAuthStudy"));
-				newRow.effect("highlight");
+				newRow.find("td").effect("highlight");
 				$("#addUser form").trigger("reset");
 			},
 			function(obj, status, text) {
@@ -405,7 +405,7 @@
 					.append($("<td/>", {class: "authority", text: user.display, "data-auth": user.authority}))
 					.append(actionCell);
 				$("#authoritiesTable").DataTable().row.add(newRow).draw();
-				newRow.effect("highlight");
+				newRow.find("td").effect("highlight");
 			},
 			function(obj, status, text) {
 				if(obj.status && obj.status == 400) {
