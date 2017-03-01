@@ -115,6 +115,25 @@
     line='aaf.shared-secret={{ service_shared_secret }}'
   when: service_shared_secret is defined and service_shared_secret != "" and service_shared_secret != None
 
+- name: Copy the example logging properties file
+  copy: >
+    src={{ cbioportal_root }}/src/main/resources/log4j.properties.EXAMPLE
+    dest={{ cbioportal_root }}/src/main/resources/log4j.properties
+    remote_src=True
+    force=no
+
+- name: Prepare the log4j.properties File
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/log4j.properties
+    regexp='^log4j.appender.a.rollingPolicy.FileNamePattern ='
+    line='log4j.appender.a.rollingPolicy.FileNamePattern ={{ catalina_home }}/logs/public-portal.log.%d.gz'
+
+- name: Prepare the log4j.properties File
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/log4j.properties
+    regexp='^log4j.appender.a.File ='
+    line='log4j.appender.a.File ={{ catalina_home }}/logs/public-portal.log'
+
 - name: Compile the cBioPortal source code with Maven
   shell: . /home/devel/.bash_profile && mvn -DskipTests clean install
   args:
