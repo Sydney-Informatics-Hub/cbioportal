@@ -2,13 +2,15 @@
 
 - name: Install epel-release
   yum: pkg=epel-release state=installed
+  become: yes
 
 - name: Update yum repositories
   yum: name=* state=latest
+  become: yes
 
 - name: Install required system dependencies for vips
   yum: pkg={{item}} state=installed
-  sudo: yes
+  become: yes
   with_items:
     - gtar
     - wget
