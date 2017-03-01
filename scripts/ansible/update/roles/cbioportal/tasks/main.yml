@@ -1,0 +1,151 @@
+---
+
+- name: Pull source code from git
+  git: >
+    repo=https://bitbucket.com/ctds/cbioportal.git
+    dest={{ cbioportal_root }}
+    version={{ cbioportal_git_tag }}
+
+- name: Create the internal pathology report root directory if it doesn't exist
+  file: >
+    path={{ internal_path_report_root }}
+    state=directory
+    mode=0755
+    owner=tomcat
+    group=tomcat
+  become: yes
+  when: internal_path_report_root is defined and internal_path_report_root != "" and internal_path_report_root != None
+
+- name: Create the internal CA125 plot root directory if it doesn't exist
+  file: >
+    path={{ internal_ca125_plot_root }}
+    state=directory
+    mode=0755
+    owner=tomcat
+    group=tomcat
+  become: yes
+  when: internal_ca125_plot_root is defined and internal_ca125_plot_root != "" and internal_ca125_plot_root != None
+
+- name: Create the internal molecular testing report root directory if it doesn't exist
+  file: >
+    path={{ internal_molecular_testing_report_root }}
+    state=directory
+    mode=0755
+    owner=tomcat
+    group=tomcat
+  become: yes
+  when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
+
+- name: Create the internal slide image root directory if it doesn't exist
+  file: >
+    path={{ internal_slide_images_root }}
+    state=directory
+    mode=0755
+    owner=tomcat
+    group=tomcat
+  become: yes
+  when: internal_slide_images_root is defined and internal_slide_images_root != "" and internal_slide_images_root != None
+
+- name: Copy the example global confirguration properties file
+  copy: >
+    src={{ cbioportal_root }}/src/main/resources/portal.properties.EXAMPLE
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    remote_src=True
+    force=no
+
+- name: Prepare the portal properties file
+  lineinfile: >
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^db.password=somepassword$'
+    line='db.password={{ cbioportal_database.password }}'
+
+- name: Update the portal properties with the internal pathology report root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_path_report_root='
+    line='patient_view.internal_path_report_root={{ internal_path_report_root }}'
+  when: internal_path_report_root is defined and internal_path_report_root != "" and internal_path_report_root != None
+
+- name: Update the portal properties with the internal CA125 plot root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_ca125_plot_root='
+    line='patient_view.internal_ca125_plot_root={{ internal_ca125_plot_root }}'
+  when: internal_ca125_plot_root is defined and internal_ca125_plot_root != "" and internal_ca125_plot_root != None
+
+- name: Update the portal properties with the internal molecular testing report root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_molecular_testing_report_root='
+    line='patient_view.internal_molecular_testing_report_root={{ internal_molecular_testing_report_root }}'
+  when: internal_molecular_testing_report_root is defined and internal_molecular_testing_report_root != "" and internal_molecular_testing_report_root != None
+
+- name: Update the portal properties with the internal slide images root directory
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^patient_view.internal_slide_images_root='
+    line='patient_view.internal_slide_images_root={{ internal_slide_images_root }}'
+  when: internal_slide_images_root is defined and internal_slide_images_root != "" and internal_slide_images_root  != None
+
+- name: Update the portal properties with the service login initiation url
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.login-initiation-url='
+    line='aaf.login-initiation-url={{ service_login_initiation_url }}'
+  when: service_login_initiation_url is defined and service_login_initiation_url != "" and service_login_initiation_url != None
+ 
+- name: Update the portal properties with the service primary url
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.primary-url='
+    line='aaf.primary-url={{ service_primary_url }}'
+  when: service_primary_url is defined and service_primary_url != "" and service_primary_url != None
+
+- name: Update the portal properties with the service issuer
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.issuer='
+    line='aaf.issuer={{ service_issuer }}'
+  when: service_issuer is defined and service_issuer != "" and service_issuer != None
+
+- name: Update the portal properties with the service shared secret
+  lineinfile: > 
+    dest={{ cbioportal_root }}/src/main/resources/portal.properties
+    regexp='^aaf.shared-secret='
+    line='aaf.shared-secret={{ service_shared_secret }}'
+  when: service_shared_secret is defined and service_shared_secret != "" and service_shared_secret != None
+
+- name: Compile the cBioPortal source code with Maven
+  shell: . /home/devel/.bash_profile && mvn -DskipTests clean install
+  args:
+    chdir: "{{ cbioportal_root }}"
+
+# Todo: copy war file without using sudo access, since devel is part of tomcat group
+- name: Deploy the cBioPortal WAR file
+  copy: >
+    src={{ cbioportal_root }}/portal/target/cbioportal.war
+    dest={{ catalina_home }}/webapps
+    remote_src=True
+  become: yes
+
+- name: Restart Apache
+  service:
+    name: httpd
+    state: restarted
+  become: yes
+
+- name: Restart Tomcat
+  service:
+    name: tomcat
+    state: restarted
+  become: yes
+
+- name: Wait for 10 minutes so that Tomcat can finish initialising cBioPortal
+  pause: minutes=10
+
+- name: Ensure the portal log file has the tomcat owner/group
+  file: >
+    path=/var/log/tomcat/public-portal.log
+    owner=tomcat
+    group=tomcat
+  become: yes

@@ -1,0 +1,23 @@
+---
+
+- name: Install epel-release
+  yum: pkg=epel-release state=installed
+
+- name: Update yum repositories
+  yum: name=* state=latest
+
+- name: Install required system dependencies for vips
+  yum: pkg={{item}} state=installed
+  sudo: yes
+  with_items:
+    - gtar
+    - wget
+    - gcc-c++
+    - glib2-devel
+    - libxml2-devel
+    - openslide-devel
+    - libgsf-devel
+    - libexif-devel
+    - libjpeg-devel
+    - openjpeg-devel
+

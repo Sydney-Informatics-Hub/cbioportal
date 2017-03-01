@@ -1,0 +1,22 @@
+---
+# Tag of the cBioPortal to target when cloning from Github
+cbioportal_git_tag: HEAD
+
+# Unique URL for the application to inititation login with Rapid Connect, provided once service registration is approved
+service_login_initiation_url:
+# Primary URL of the application provided as part of service registration, e.g. https://westmead-cbioportal.intersect.org.au/cbioportal 
+service_primary_url:
+# Rapid connect environment used to issue the service, "https://rapid.aaf.edu.au" when in the production environment or "https://rapid.test.aaf.edu.au" when in the test environment
+service_issuer:
+# Secret value shared between the service and Rapid Connect, as part of registration, for token encryption and verification
+# Note: any backslash (\) characters within the shared-secret MUST be escaped with an additional backslash (\\), otherwise the backslash will be silently dropped when the property is loaded within cBioPortal
+service_shared_secret:
+
+# Root directory to internal pathology reports, for example "/home/devel/data/pathology_reports"
+internal_path_report_root:
+# Root directory to internal CA125 plots, for example "/home/devel/data/ca125_plots"
+internal_ca125_plot_root:
+# Root directory to internal molecular testing reports, for example "/home/devel/data/molecular_testing_reports"
+internal_molecular_testing_report_root:
+# Root directory to internal slide images, for example "/home/devel/data/internal_slide_images_root"
+internal_slide_images_root:

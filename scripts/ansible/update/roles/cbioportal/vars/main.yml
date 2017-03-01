@@ -1,0 +1,20 @@
+---
+
+cbioportal_root: /home/devel/cbioportal
+
+catalina_home: /usr/share/tomcat/
+
+maven_mirror: "https://archive.apache.org/dist/maven"
+
+mysql_databases:
+  - name: cbioportal
+  - name: cgds_test
+mysql_users:
+  - {name: cbio_user, password: "cbio_user", host: "%", priv: "cbioportal.*:ALL"}
+  - {name: cbio_user, password: "cbio_user", host: "%", priv: "cgds_test.*:ALL", append_privs: "yes"}
+
+cbioportal_database:
+  name: cbioportal
+  username: cbio_user
+  password: cbio_user
+

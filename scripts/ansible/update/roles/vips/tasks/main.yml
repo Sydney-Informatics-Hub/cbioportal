@@ -1,0 +1,44 @@
+---
+
+- include: ./system_dependencies.yml
+
+- name: Check if vips is installed
+  stat: path={{ vips_home }}/{{ vips_version }}/
+  register: vips
+
+- name: Download vips
+  get_url:
+    url: http://www.vips.ecs.soton.ac.uk/supported/current/{{ vips_version }}.tar.gz
+    dest: {{ vips_home }}
+  become: yes
+  when: vips.stat.exists == False
+
+- name: Extract vips
+  unarchive:
+    src: {{ vips_home }}/{{ vips_version }}.tar.gz
+    dest: {{ vips_home }}
+    remote_src: True
+  become: yes
+  when: vips.stat.exists == False
+
+- name: Configure vips
+  command: ./configure
+  args:
+    chdir: {{ vips_home }}/{{ vips_version }}
+  become: yes
+  when: vips.stat.exists == False
+
+- name: Build vips
+  command: make
+  args:
+    chdir: {{ vips_home }}/{{ vips_version }}
+  become: yes
+  when: vips.stat.exists == False
+
+- name: Install vips
+  command: make install
+  args:
+    chdir: {{ vips_home }}/{{ vips_version }}
+  become: yes
+  when: vips.stat.exists == False
+
