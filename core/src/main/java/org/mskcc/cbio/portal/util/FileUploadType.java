@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
@@ -93,7 +94,11 @@ public enum FileUploadType {
 				}
 			}
 		}
-		return String.format("%s.%02d%s", baseName, taken.last() + 1, extension);
+		int serialId = 1;
+		try {
+			serialId = taken.last() + 1;
+		} catch(NoSuchElementException e) {}
+		return String.format("%s.%02d%s", baseName, serialId, extension);
 	}
 	
 	private String description;
