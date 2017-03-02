@@ -89,7 +89,7 @@ public enum FileUploadType {
 			if(existingInThisBase != null) {
 				for(File file : existingInThisBase) {
 					String name = FilenameUtils.getBaseName(file.getName());
-					Integer num = Integer.parseInt(name.substring(name.lastIndexOf('.')));
+					Integer num = Integer.parseInt(name.substring(name.lastIndexOf('.')+1));
 					taken.add(num);
 				}
 			}
