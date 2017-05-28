@@ -32,7 +32,7 @@ public class PyramidImageProcessor {
 	public static File store(FileItem image, String svsImageName) {
 		if(!PROCESSING_DIR.exists()) {
 			log.info("Creating directory " + PROCESSING_DIR.getAbsolutePath());
-			PROCESSING_DIR.mkdirs();
+			mkdirs(PROCESSING_DIR);
 		}
 		File file = new File(PROCESSING_DIR, svsImageName);
 		try {
@@ -43,6 +43,19 @@ public class PyramidImageProcessor {
 			return null;
 		}
 		return file;
+	}
+	
+	private static boolean mkdirs(File dir) {
+		if(!dir.getParentFile().exists()) {
+			if(!mkdirs(dir.getParentFile())) {
+				return false;
+			}
+		}
+		if(!dir.mkdir()) {
+			log.error("Could not create directory " + dir.getAbsolutePath());
+			return false;
+		}
+		return true;
 	}
 	
 	public static void convertToDzi(final String svsImageName) throws IOException {
@@ -59,7 +72,7 @@ public class PyramidImageProcessor {
 		
 		if(!CONVERTED_DIR.exists()) {
 			log.info("Creating directory " + CONVERTED_DIR.getAbsolutePath());
-			CONVERTED_DIR.mkdirs();
+			mkdirs(CONVERTED_DIR);
 		}
 		
 		final long startTime = System.currentTimeMillis();

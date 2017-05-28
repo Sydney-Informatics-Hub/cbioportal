@@ -132,6 +132,7 @@ public class UploadPDFServlet extends HttpServlet {
         try {
 			form.getFile().write(fullFile);
 		} catch (Exception e) {
+			logger.error("Error saving file " + form.getFile().getName() + " to disk at " + fullFile, e);
 			returnWithError(request, response, "Error saving file to disk.");
 			return;
 		}
