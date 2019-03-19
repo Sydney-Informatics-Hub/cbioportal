@@ -197,7 +197,7 @@
 
 - name: Download the cBioPortal seed database
   get_url: >
-    url=https://storage.googleapis.com/cbiostorage-1/cbioportal-seed.sql.gz
+    url=https://www.dropbox.com/s/yziu587fx23n41d/cbioportal-seed.sql.gz?dl=1
     dest=/home/devel
     timeout=1000
   tags:
