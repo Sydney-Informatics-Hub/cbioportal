@@ -18,7 +18,7 @@
 
 - name: Pull source code from git
   git: >
-    repo=https://bitbucket.com/ctds/cbioportal.git
+    repo=https://github.com/Sydney-Informatics-Hub/cbioportal.git
     dest={{ cbioportal_root }}
     version={{ cbioportal_git_tag }}
     force=yes
