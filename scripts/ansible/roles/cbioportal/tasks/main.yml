@@ -218,6 +218,11 @@
     path=/home/devel/cbioportal-seed.sql
     state=absent
 
+- name: Run cbioportal migration script as seed file is not up to date
+  shell: . /home/devel/.bash_profile && mysql --user="{{ cbioportal_database.username }}" --password="{{ cbioportal_database.password }}" cbioportal  < {{ cbioportal_root }}/core/src/main/resources/db/migration.sql
+  tags:
+    - clean
+
 - name: Copy the cBioPortal jti claim database table seed file
   copy: >
     src=jti_claim.sql
