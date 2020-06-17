@@ -20,7 +20,11 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.  If not, see <
+
+
+
+//www.gnu.org/licenses/>.
 #
 
 """Data validation script - validate files before import into portal.
@@ -1774,7 +1778,7 @@ class SegValidator(Validator):
 
         chrom_size_dict = {}
         chrom_size_url = (
-            'http://hgdownload.cse.ucsc.edu'
+            'https://hgdownload.cse.ucsc.edu'
             '/goldenPath/{build}/bigZips/{build}.chrom.sizes').format(
                 build=genome_build)
         logger.debug("Retrieving chromosome lengths from '%s'",
